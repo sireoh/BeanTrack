@@ -11,7 +11,10 @@ const session = require("express-session");
 const bcrypt = require("bcrypt");
 const Joi = require("joi");
 const axios = require("axios");
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
 var listArr = [];
+var myList = [];
 
 /* #endregion requiredModules */
 /* #region userImports */
@@ -81,6 +84,11 @@ app.use((req, res, next) => {
 app.get("/", async (req, res) => {
   var username = getUsername(req);
   var authenticated = isAuthenticated(req);
+
+  const notFound = {
+
+  };
+
   const tvdata = typeof(req.query.search) === "undefined" ? "" : await searchShows(req.query.search);
   const search = !req.query.search ? "" : req.query.search;
 
@@ -88,7 +96,7 @@ app.get("/", async (req, res) => {
     username: username,
     authenticated: authenticated,
     tvdata: tvdata,
-    search: search
+    search: search,
   });
 });
 
@@ -183,27 +191,21 @@ app.get("/logout", (req, res) => {
 
 /* #region components */
 async function searchShows(search){
-  let str = `<table class="container">
-              <tr>
-                  <th>#</th>
-                  <th>Image</th>
-                  <th>TV Show Title</th>
-                  <th>Rating</th>
-                  <th>IMDB</th>
-              </tr>`;
+  let arr = [];
+
   const result = await axios.get(`https://api.tvmaze.com/search/shows?q=${search}`);
 
   for (let i = 0; i < result.data.length; i++) {
-    str += `<tr>
-            <td>${i+1}</td>
-            <td><img src="${result.data[i].show.image.medium}" alt=""></td>
-            <td>${result.data[i].show.name}</td>
-            <td>${formatRating(result.data[i].show.rating.average)}</td>
-            <td><a href="https://www.imdb.com/title/${result.data[i].show.externals.imdb}/">IMDB</a></td>
-          </tr>`;
-  }
-  str += "</table>";
-  return str;
+      arr.push({
+        index: i+1,
+        image: result.data[i].show.image.medium,
+        name: result.data[i].show.name,
+        rating: result.data[i].show.rating.average,
+        imdb: result.data[i].show.externals.imdb
+      });
+    }
+  listArr = arr;
+  return arr;
 }
 
 function formatRating(float) {
@@ -233,6 +235,25 @@ function setRatingCol(float) {
 
 app.post("/searching", async (req, res) => {
   res.redirect(`/?search=${req.body.search}`);
+});
+
+app.get("/test", async (req, res) => {
+  const search = req.query.search;
+  const result = await axios.get(`https://api.tvmaze.com/search/shows?q=${search}`);
+  res.send(result.data);
+});
+
+app.get("/api/listarr", (req, res) => {
+  res.send(listArr);
+});
+
+app.post("/api/addtoserver", (req, res) => {
+  myList.push(req.body);
+  console.log(req.body);
+});
+
+app.get("/profile", (req, res) => {
+  res.send(myList);
 });
 /* #endregion components */
 
