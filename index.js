@@ -11,7 +11,7 @@ const session = require("express-session");
 const bcrypt = require("bcrypt");
 const Joi = require("joi");
 const axios = require("axios");
-const searchCache = [];
+var listArr = [];
 
 /* #endregion requiredModules */
 /* #region userImports */
@@ -81,12 +81,14 @@ app.use((req, res, next) => {
 app.get("/", async (req, res) => {
   var username = getUsername(req);
   var authenticated = isAuthenticated(req);
-  const tvdata = typeof(req.query.search) === undefined ? "" : await searchShows(req.query.search);
+  const tvdata = typeof(req.query.search) === "undefined" ? "" : await searchShows(req.query.search);
+  const search = !req.query.search ? "" : req.query.search;
 
   res.render("index", {
     username: username,
     authenticated: authenticated,
-    tvdata: tvdata
+    tvdata: tvdata,
+    search: search
   });
 });
 
@@ -186,20 +188,47 @@ async function searchShows(search){
                   <th>#</th>
                   <th>Image</th>
                   <th>TV Show Title</th>
-                  <th>Status</th>
+                  <th>Rating</th>
+                  <th>IMDB</th>
               </tr>`;
   const result = await axios.get(`https://api.tvmaze.com/search/shows?q=${search}`);
 
   for (let i = 0; i < result.data.length; i++) {
     str += `<tr>
-            <td>1</td>
+            <td>${i+1}</td>
             <td><img src="${result.data[i].show.image.medium}" alt=""></td>
             <td>${result.data[i].show.name}</td>
-            <td><span class="fw-bold text-success">Completed</span></td>
+            <td>${formatRating(result.data[i].show.rating.average)}</td>
+            <td><a href="https://www.imdb.com/title/${result.data[i].show.externals.imdb}/">IMDB</a></td>
           </tr>`;
   }
   str += "</table>";
   return str;
+}
+
+function formatRating(float) {
+  if (float === null) {
+    float = "No Rating";
+  }
+
+  let str = `<span class="fw-bold text-${setRatingCol(float)}">${float}</span>`;
+  return str;
+}
+
+function setRatingCol(float) {
+  let col = ["secondary", "danger", "warning", "success"];
+
+  if (float === "No Rating") {
+    return col[0];
+  }
+
+  if (float <= 6.9) {
+    return col[1];
+  } else if (float <= 7.75) {
+    return col[2];
+  } else {
+    return col[3];
+  }
 }
 
 app.post("/searching", async (req, res) => {

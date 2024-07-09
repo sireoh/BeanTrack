@@ -6,7 +6,7 @@
             <a href="/profile">My List</a><br>
             Hi <%= username %>!
         </div>
-        <%- include("components/searchbar", {}) %>
+        <%- include("components/searchbar", { search: search }) %>
         <%- include("components/tvlist", {data: tvdata}) %>
     <% } else { %>
         <a href="/login">Login</a>&nbsp;<a href="/signup">Sign Up</a>
