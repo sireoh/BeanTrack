@@ -97,6 +97,13 @@ app.get("/", async (req, res) => {
     } catch (error) {
       console.log(error);
     }
+  } else {
+    try {
+      tvdata = await searchShows(req.query.search);
+      moviedata = await searchMovies(req.query.search);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   res.render("index", {
