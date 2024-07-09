@@ -11,6 +11,7 @@ const session = require("express-session");
 const bcrypt = require("bcrypt");
 const Joi = require("joi");
 const axios = require("axios");
+const searchCache = [];
 
 /* #endregion requiredModules */
 /* #region userImports */
@@ -80,11 +81,12 @@ app.use((req, res, next) => {
 app.get("/", async (req, res) => {
   var username = getUsername(req);
   var authenticated = isAuthenticated(req);
+  const tvdata = typeof(req.query.search) === undefined ? "" : await searchShows(req.query.search);
 
   res.render("index", {
     username: username,
     authenticated: authenticated,
-    tvdata: await searchShows(req.query.search || "atypical")
+    tvdata: tvdata
   });
 });
 
@@ -178,11 +180,6 @@ app.get("/logout", (req, res) => {
 });
 
 /* #region components */
-app.get("/test", async (req, res) => {
-  const temp = await searchShows("girls");
-  res.send(temp); 
-});
-
 async function searchShows(search){
   let str = `<table class="container">
               <tr>
@@ -204,6 +201,10 @@ async function searchShows(search){
   str += "</table>";
   return str;
 }
+
+app.post("/searching", async (req, res) => {
+  res.redirect(`/?search=${req.body.search}`);
+});
 /* #endregion components */
 
 app.get("*", (req, res) => {

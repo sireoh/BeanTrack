@@ -3,8 +3,10 @@
     <% if (authenticated) { %>
         <div class="d-grid justify-content-end">
             <a href="/logout">Logout</a><br>
+            <a href="/profile">My List</a><br>
             Hi <%= username %>!
         </div>
+        <%- include("components/searchbar", {}) %>
         <%- include("components/tvlist", {data: tvdata}) %>
     <% } else { %>
         <a href="/login">Login</a>&nbsp;<a href="/signup">Sign Up</a>
