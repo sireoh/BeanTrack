@@ -1,0 +1,29 @@
+{
+  "name": "beantv",
+  "version": "1.0.0",
+  "description": "a tv and movie tracking application written in Javascript, hosted on Render and uses the TVMaze API, as well as MongoDB.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sireoh/BeanTV.git"
+  },
+  "author": "Vincent Fung",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sireoh/BeanTV/issues"
+  },
+  "homepage": "https://github.com/sireoh/BeanTV#readme",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "connect-mongo": "^5.1.0",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "joi": "^17.13.3",
+    "mongodb": "^6.8.0"
+  }
+}
