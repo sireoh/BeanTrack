@@ -86,9 +86,18 @@ app.get("/", async (req, res) => {
   var username = getUsername(req);
   var authenticated = isAuthenticated(req);
 
-  const tvdata = typeof(req.query.search) === "undefined" ? "" : await searchShows(req.query.search);
-  const moviedata = typeof(req.query.search) === "undefined" ? "" : await searchMovies(req.query.search);
+  let tvdata, moviedata;
+
   const search = !req.query.search ? "" : req.query.search;
+
+  if (!search) {
+    try {
+      tvdata = await searchShows(req.query.search);
+      moviedata = await searchMovies(req.query.search);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   res.render("index", {
     username: username,
