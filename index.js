@@ -13,7 +13,8 @@ const Joi = require("joi");
 const axios = require("axios");
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
-var listArr = [];
+var tvCache = [];
+var movieCache = [];
 var myList = [];
 
 /* #endregion requiredModules */
@@ -85,17 +86,15 @@ app.get("/", async (req, res) => {
   var username = getUsername(req);
   var authenticated = isAuthenticated(req);
 
-  const notFound = {
-
-  };
-
   const tvdata = typeof(req.query.search) === "undefined" ? "" : await searchShows(req.query.search);
+  const moviedata = typeof(req.query.search) === "undefined" ? "" : await searchMovies(req.query.search);
   const search = !req.query.search ? "" : req.query.search;
 
   res.render("index", {
     username: username,
     authenticated: authenticated,
     tvdata: tvdata,
+    moviedata: moviedata,
     search: search,
   });
 });
@@ -191,21 +190,59 @@ app.get("/logout", (req, res) => {
 
 /* #region components */
 async function searchShows(search){
-  let arr = [];
+  let tvArr = [];
 
-  const result = await axios.get(`https://api.tvmaze.com/search/shows?q=${search}`);
+  try {
+    const result = await axios.get(`https://api.tvmaze.com/search/shows?q=${search}`);
 
-  for (let i = 0; i < result.data.length; i++) {
-      arr.push({
-        index: i+1,
-        image: result.data[i].show.image.medium,
-        name: result.data[i].show.name,
-        rating: result.data[i].show.rating.average,
-        imdb: result.data[i].show.externals.imdb
-      });
+    for (let i = 0; i < result.data.length; i++) {
+      const showData = result.data[i].show;
+
+      if (showData && showData.image && showData.image.medium) {
+        tvArr.push({
+          index: i + 1,
+          image: showData.image.medium,
+          name: showData.name,
+          rating: showData.rating?.average || 'N/A',
+          imdb: showData.externals?.imdb || 'N/A'
+        });
+      } else {
+
+        tvArr.push({
+          index: i + 1,
+          image: 'N/A',
+          name: showData.name,
+          rating: showData.rating?.average || 'N/A',
+          imdb: showData.externals?.imdb || 'N/A'
+        });
+      }
+
+      tvCache = tvArr;
     }
-  listArr = arr;
-  return arr;
+  } catch (error) {
+    console.log(error);
+  }
+  return tvArr;
+}
+
+async function searchMovies(search) {
+  let movieArr = [];
+  const result = await axios.get(`https://www.omdbapi.com/?t=${search}&apikey=b05a38fc`);
+
+  try {
+    movieArr.push({
+      index: 1,
+      image: result.data.Poster,
+      name: result.data.Title,
+      rating: result.data.Ratings[0].Value,
+      imdb: result.data.imdbID
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  movieCache = movieArr;
+
+  return movieArr;
 }
 
 function formatRating(float) {
@@ -215,22 +252,6 @@ function formatRating(float) {
 
   let str = `<span class="fw-bold text-${setRatingCol(float)}">${float}</span>`;
   return str;
-}
-
-function setRatingCol(float) {
-  let col = ["secondary", "danger", "warning", "success"];
-
-  if (float === "No Rating") {
-    return col[0];
-  }
-
-  if (float <= 6.9) {
-    return col[1];
-  } else if (float <= 7.75) {
-    return col[2];
-  } else {
-    return col[3];
-  }
 }
 
 app.post("/searching", async (req, res) => {
@@ -243,8 +264,12 @@ app.get("/test", async (req, res) => {
   res.send(result.data);
 });
 
-app.get("/api/listarr", (req, res) => {
-  res.send(listArr);
+app.get("/api/tvcache", (req, res) => {
+  res.send(tvCache);
+});
+
+app.get("/api/moviecache", (req, res) => {
+  res.send(movieCache);
 });
 
 app.post("/api/addtoserver", (req, res) => {
