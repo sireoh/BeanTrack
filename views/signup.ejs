@@ -1,4 +1,4 @@
-<%- include("templates/header") %>
+<%- include("components/header") %>
 <form action="/submitUser" method="post">
   <input name="username" type="text" placeholder="Username" required />
   <input name="password" type="password" placeholder="Password" required />
@@ -8,4 +8,4 @@
 <% let i=0; %> <% for(i=0; i < errors.length; i++) { %>
   <%=errors[i]%> <br />
 <% } %>
-<%- include("templates/footer") %>
+<%- include("components/footer") %>

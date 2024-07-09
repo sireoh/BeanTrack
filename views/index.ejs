@@ -1,3 +1,13 @@
-<%- include("templates/header", {index: true}) %>
-index
-<%- include("templates/footer") %>
+<%- include("components/header", {}) %>
+<div class="container">
+    <% if (authenticated) { %>
+        <div class="d-grid justify-content-end">
+            <a href="/logout">Logout</a><br>
+            Hi <%= username %>!
+        </div>
+        <%- include("components/tvlist", {data: tvdata}) %>
+    <% } else { %>
+        <a href="/login">Login</a>&nbsp;<a href="/signup">Sign Up</a>
+    <% } %>
+</div>
+<%- include("components/footer") %>

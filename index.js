@@ -10,6 +10,7 @@ const app = express();
 const session = require("express-session");
 const bcrypt = require("bcrypt");
 const Joi = require("joi");
+const axios = require("axios");
 
 /* #endregion requiredModules */
 /* #region userImports */
@@ -73,24 +74,18 @@ app.use((req, res, next) => {
   app.locals.authenticated = isAuthenticated(req);
   next();
 });
-
-async function checkAuth(req, res, next) {
-  if (isAuthenticated(req)) {
-    next();
-  } else {
-    res
-      .status(401)
-      .json({ message: "You are not authorized." });
-  }
-}
 /* #endregion middleware */
 
 /* #region serverRouting */
 app.get("/", async (req, res) => {
   var username = getUsername(req);
   var authenticated = isAuthenticated(req);
-  // console.log(skillCats);
-  res.render("index", {});
+
+  res.render("index", {
+    username: username,
+    authenticated: authenticated,
+    tvdata: await searchShows(req.query.search || "atypical")
+  });
 });
 
 app.get("/login", (req, res) => {
@@ -178,9 +173,38 @@ app.post("/submitUser", async (req, res) => {
 });
 
 app.get("/logout", (req, res) => {
-  req.session.destroy(); // Deletes the session
-  res.redirect("/"); // Sends back to the homepage
+  req.session.destroy();
+  res.redirect("/");
 });
+
+/* #region components */
+app.get("/test", async (req, res) => {
+  const temp = await searchShows("girls");
+  res.send(temp); 
+});
+
+async function searchShows(search){
+  let str = `<table class="container">
+              <tr>
+                  <th>#</th>
+                  <th>Image</th>
+                  <th>TV Show Title</th>
+                  <th>Status</th>
+              </tr>`;
+  const result = await axios.get(`https://api.tvmaze.com/search/shows?q=${search}`);
+
+  for (let i = 0; i < result.data.length; i++) {
+    str += `<tr>
+            <td>1</td>
+            <td><img src="${result.data[i].show.image.medium}" alt=""></td>
+            <td>${result.data[i].show.name}</td>
+            <td><span class="fw-bold text-success">Completed</span></td>
+          </tr>`;
+  }
+  str += "</table>";
+  return str;
+}
+/* #endregion components */
 
 app.get("*", (req, res) => {
   res.status(404);
@@ -188,7 +212,6 @@ app.get("*", (req, res) => {
 });
 /* #endregion serverRouting */
 
-/** starts the server and listens on the specified port */
 app.listen(port, () => {
   console.log("Node application listening on port " + port);
 });
