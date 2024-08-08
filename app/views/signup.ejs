@@ -1,0 +1,11 @@
+<%- include('components/header') %>
+<form action="/signupSubmit" method="post">
+  <% if (typeof errors !== 'undefined' && errors !== null) { %>
+    <%= errors %>
+  <% } %>
+  Sign Up
+  <input name="username" type="text" placeholder="username">
+  <input name="password" type="password" placeholder="password">
+  <button type="submit">Submit</button>
+</form>
+<%- include('components/footer') %>

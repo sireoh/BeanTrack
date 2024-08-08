@@ -1,0 +1,13 @@
+<%- include('components/header') %>
+<form action="/loggingIn" method="post">
+    <% if (typeof errors !== 'undefined' && errors !== null) { %>
+        <span class="text-danger"><%= errors %></span>
+      <% } %>
+    <div>
+      Login
+      <input name="username" type="text" placeholder="username">
+      <input name="password" type="password" placeholder="password">
+      <button type="submit">Sign in</button>
+    </div>
+</form>
+<%- include('components/footer') %>

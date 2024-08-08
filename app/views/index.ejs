@@ -1,0 +1,6 @@
+<%- include('components/header', { 
+    authenticated : authenticated,
+    username : username
+ }) %>
+<%- include('components/tvlist', { status_colors: status_colors, data: data }) %>
+<%- include('components/footer') %>
