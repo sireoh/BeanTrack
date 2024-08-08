@@ -1,6 +1,6 @@
 <!-- add new -->
 <div class="d-flex justify-content-end">
-    <a class="btn btn-outline-secondary" href="/addShow" id="d08f7ea0-d1df-4106-9434-844e1acffbfb">➕ Add Show</a>
+    <a class="btn btn-outline-secondary" href="/showResults" id="d08f7ea0-d1df-4106-9434-844e1acffbfb">➕ Add Show</a>
 </div>
 
 <!-- filters -->
@@ -18,7 +18,7 @@
         <button type="submit" class="btn btn-outline-primary" data-mdb-ripple-init>🔍</button>
     </div>
 </form>
-<table class="text-center">
+<table class="text-center w-100">
     <% if (data.length !== 0) { %>
         <tr class="border-bottom">
             <th></th>
@@ -35,20 +35,21 @@
     <% }%>
     <% for (let i = 0; i < data.length; i++) { %>
         <tr class="border-bottom">
-            <td style="background-color: <%= status_colors[ data[0].status ] %>;">&nbsp;</td>
+            <td style="background-color: <%= status_colors[ data[i].status ] %>;">&nbsp;</td>
             <td><%= i+1 %></td>
-            <td class="btn m-0"><img src="<%= data[0].image %>" height="128px"></td>
+            <td class="m-1"><img src="<%= data[i].image %>" height="128px"></td>
             <td>
                 <a 
-                    href="https://www.imdb.com/title/<%= data[0].imdb %>/"
+                    target="_blank"
+                    href="https://www.imdb.com/title/<%= data[i].imdb %>/"
                     class="me-auto fw-bold text-decoration-none fs-5"
-                ><%= data[0].title %></a>
+                ><%= data[i].title %></a>
             </td>
-            <td><%= data[0].score %></td>
-            <td><%= data[0].type %></td>
+            <td><%= data[i].score %></td>
+            <td><%= data[i].type %></td>
             <td>
-                S<%= data[0].progress.season %>
-                E<%= data[0].progress.episode %>
+                S<%= data[i].progress.season %>
+                E<%= data[i].progress.episode %>
             </td>
             <td><button onclick="alert(`remove ${data[0].title}?`)">✏️</button></td>
         </tr>

@@ -22,20 +22,7 @@ const status_colors = {
 	"planned" : "#c3c3c3"
 }
 
-const clientside_userdata = [
-    {
-        "status" : "onhold",
-        "image" : "https://static.tvmaze.com/uploads/images/medium_portrait/504/1262336.jpg",
-        "title" : "Severance",
-        "imdb" : "tt11280740",
-        "score" : 7.8,
-        "type" : "TV",
-        "progress" : {
-            "season" : (1),
-            "episode" : (9)
-        }
-    }
-]
+let showDataResults = null;
 /* #endregion variables */
 
 /* #region app init */
@@ -80,9 +67,10 @@ function sessionValidation(req, res, next) {
 
 /* #region routing */
 app.get('/', async (req, res) => {
-    let filtered_data = clientside_userdata;
     const authenticated = req.session.authenticated;
     const search = req.query.search ? req.query.search : "";
+    let filtered_data = req.session.userData ? req.session.userData : [];
+
     if (!authenticated) {
         res.render("landing", {
             username: null,
@@ -91,8 +79,16 @@ app.get('/', async (req, res) => {
         return;
     }
 
+    const result = await userCollection
+        .find({username: req.session.username})
+        .project({ user_data: 1})
+        .toArray();
+
+    filtered_data = result[0].user_data;
+    req.session.userData = filtered_data;
+
     if (search !== "") {
-        filtered_data = clientside_userdata.filter((item) => {
+        filtered_data.filter((item) => {
             return item.title.toLowerCase() === search;
         });
     }
@@ -189,8 +185,7 @@ app.post('/loggingIn', async (req, res) => {
     if (await bcrypt.compare(password, data[0].password)) {
         req.session.authenticated = true;
         req.session.username = data[0].username;
-        clientside_userdata = data[0].user_data;
-        // console.log(data[0].user_data);
+        req.session.userData = data[0].user_data;
         req.session.cookie.maxAge = expireTime;
 
         res.redirect("/")
@@ -214,18 +209,26 @@ app.post('/search', (req, res) => {
     res.redirect(`/tvlist?search=${search}`);
 });
 
-app.get('/tvlist', sessionValidation, (req, res) => {
+app.get('/tvlist', sessionValidation, async (req, res) => {
     const search = req.query.search ? req.query.search : "";
-    let filtered_data = clientside_userdata;
+    let filtered_data = req.session.userData ? req.session.userData : [];
+
+    const result = await userCollection
+    .find({username: req.session.username})
+    .project({ user_data: 1})
+    .toArray();
+
+    filtered_data = result[0].user_data;
+    req.session.userData = filtered_data;
 
     if (req.query.status) {
-        filtered_data = clientside_userdata.filter((item) => {
+        filtered_data = req.session.userData.filter((item) => {
             return item.status === req.query.status;
         });
     }
 
     if (search !== "") {
-        filtered_data = clientside_userdata.filter((item) => {
+        filtered_data = req.session.userData.filter((item) => {
             if (item.title.toLowerCase() === search) {
                 return true;
             }
@@ -248,36 +251,34 @@ app.post('/searchShow', async (req, res) => {
     await fetch(`https://api.tvmaze.com/search/shows?q=${search}`)
         .then((res) => res.json())
         .then((data) => {
-            let addShowData = [];
+            showDataResults = [];
 
             for (let i = 0; i < data.length; i++) {
                 const img = data[i].show.image ? data[i].show.image.medium : "";
+                const summary = data[i].show ? data[i].show.summary : "";
                 
-                addShowData.push({
+                showDataResults.push({
+                    "id": data[i].show.id,
                     "image": img,
                     "title": data[i].show.name,
                     "imdb": data[i].show.externals.imdb,
-                    "summary": formatSummary(data[i].show.summary),
+                    "summary": formatSummary(summary),
                     "score": data[i].show.rating.average
                 });
             }
 
-            res.render("addshow", {
-                username: req.session.username,
-                authenticated: req.session.authenticated,
-                search: search,
-                data: addShowData
-            });
+            res.redirect(`/showResults?search=${search}`);
         });
 });
 
-app.get('/addShow', (req, res) => {
+app.get('/showResults', (req, res) => {
     const search = req.query.search ? req.query.search : "";
 
-    res.render("addshow", {
+    res.render("showResults", {
         username: req.session.username,
         authenticated: req.session.authenticated,
-        search: search
+        search: search,
+        data: showDataResults
     });
 });
 
@@ -287,6 +288,30 @@ function formatSummary(str) {
     .substring(0, 80)
     + (str.length > 80 ? " ..." : "");
 }
+
+app.get('/addShow', (req, res) => {
+    const id = req.query.id;
+    const data = showDataResults.filter((item) => {
+        return item.id == id;
+    });
+
+    userCollection.updateOne(
+        { username: req.session.username },
+        { $push: { user_data: {
+            "status": req.query.status,
+            "image": data[0].image,
+            "title": data[0].title,
+            "imdb": data[0].imdb,
+            "score": data[0].score,
+            "type": "TV",
+            "progress": []
+        } } }
+    );
+
+    console.log(`Added ${data[0].title} to the list, marked as ${req.query.status}`);
+
+    res.redirect("/tvlist");
+});
 
 app.get('*', (req, res) => {
     res.status(404).render("404", {

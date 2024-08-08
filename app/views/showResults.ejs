@@ -9,13 +9,14 @@
     </div>
 </form>
 
-<% if (typeof data !== "undefined" && data.length > 0) { %>
+<% if (data && typeof data !== "undefined" && data.length > 0) { %>
     <table class="w-100">
         <tr>
-            <th>Image</th>
-            <th>Title</th>
-            <th>Summary</th>
+            <th class="col-md-1">Image</th>
+            <th class="col-md-2">Title</th>
+            <th class="col-md-auto">Summary</th>
             <th>Score</th>
+            <th></th>
         </tr>
         <% for (let i = 0; i < data.length; i++) { %>
             <tr>
@@ -24,7 +25,12 @@
                     <a href="https://www.imdb.com/title/<%= data[i].imdb %>/" class="text-decoration-none fw-bold"><%= data[i].title %></a>
                 </td>
                 <td><%- data[i].summary %></td>
-                <td><%= data[i].score %></td>
+                <td class="text-center"><%= data[i].score %></td>
+                <td class="btn-group">
+                    <a href="/addShow?id=<%= data[i].id %>&status=completed" class="btn btn-outline-primary">✅ Completed</a>
+                    <a href="/addShow?id=<%= data[i].id %>&status=current" class="btn btn-outline-primary">🌊 Current</a>
+                    <a href="/addShow?id=<%= data[i].id %>&status=planned" class="btn btn-outline-secondary">🪴 Planned</a>
+                </td>
             </tr>
         <% } %>
     </table>
