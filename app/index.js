@@ -13,9 +13,7 @@ const SALTROUNDS = 10;
 let error_message = "";
 const PORT = process.env.PORT || 3000;
 const expireTime = 24 * 60 * 60 * 1000;
-/* #endregion variables */
 
-/* #region debug vars */
 const status_colors = {
 	"current" : "#23b230",
 	"completed" : "#26448f",
@@ -24,22 +22,8 @@ const status_colors = {
 	"planned" : "#c3c3c3"
 }
 
-const user_data = [
-    {
-        "_id" : {},
-		"status" : "onhold",
-		"image" : "https://static.tvmaze.com/uploads/images/medium_portrait/504/1262336.jpg",
-		"title" : "Severance",
-        "imdb": "tt11280740",
-		"score" : 7.8,
-		"type" : "TV",
-		"progress" : {
-            "season" : 1,
-			"episode" : 9
-        }
-    }
-];
-/* #region debug vars */
+let clientside_userdata = [];
+/* #endregion variables */
 
 /* #region app init */
 app.set("view engine", "ejs");
@@ -82,7 +66,9 @@ function sessionValidation(req, res, next) {
 
 /* #region routing */
 app.get('/', async (req, res) => {
+    let filtered_data = clientside_userdata;
     const authenticated = req.session.authenticated;
+    const search = req.query.search ? req.query.search : "";
     if (!authenticated) {
         res.render("landing", {
             username: null,
@@ -91,11 +77,18 @@ app.get('/', async (req, res) => {
         return;
     }
 
+    if (search !== "") {
+        filtered_data = clientside_userdata.filter((item) => {
+            return item.title.toLowerCase() === search;
+        });
+    }
+
     res.render("index", {
         username: req.session.username,
         authenticated: authenticated,
         status_colors: status_colors,
-        data: user_data
+        data: filtered_data,
+        search: search
     });
 });
 
@@ -170,7 +163,7 @@ app.post('/loggingIn', async (req, res) => {
 
     const data = await userCollection
         .find({username: username})
-        .project({username: 1, password: 1, user_tv_data: 1})
+        .project({username: 1, password: 1, user_data: 1})
         .toArray();
 
     if (data.length != 1) {
@@ -182,6 +175,8 @@ app.post('/loggingIn', async (req, res) => {
     if (await bcrypt.compare(password, data[0].password)) {
         req.session.authenticated = true;
         req.session.username = data[0].username;
+        clientside_userdata = data[0].user_data;
+        // console.log(data[0].user_data);
         req.session.cookie.maxAge = expireTime;
 
         res.redirect("/")
@@ -200,21 +195,34 @@ app.get('/logOut', (req, res) => {
 });
 /* #endregion login */
 
+app.post('/search', (req, res) => {
+    const search = req.body.search;
+    res.redirect(`/tvlist?search=${search}`);
+});
+
 app.get('/tvlist', sessionValidation, (req, res) => {
-    let filtered_data = user_data;
+    const search = req.query.search ? req.query.search : "";
+    let filtered_data = clientside_userdata;
 
     if (req.query.status) {
-        filtered_data = user_data.filter((item) => {
+        filtered_data = clientside_userdata.filter((item) => {
             return item.status === req.query.status;
         });
-        console.log(filtered_data);
+        // console.log(filtered_data);
+    }
+
+    if (search !== "") {
+        filtered_data = clientside_userdata.filter((item) => {
+            return item.title.toLowerCase() === search;
+        });
     }
 
     res.render("index", {
         username: req.session.username,
         authenticated: req.session.authenticated,
         status_colors: status_colors,
-        data: filtered_data
+        data: filtered_data,
+        search: search
     });
 });
 

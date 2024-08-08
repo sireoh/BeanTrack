@@ -1,34 +1,47 @@
 <!-- filters -->
 <ul class="btn-group w-100 m-0 p-0">
-    <li class="btn btn-light"><a href="/tvlist">All TV/Movies</a></li>
-    <li class="btn btn-light"><a href="/tvlist?status=current">Currently Watching</a></li>
-    <li class="btn btn-light"><a href="/tvlist?status=completed">Completed</a></li>
-    <li class="btn btn-light"><a href="/tvlist?status=onhold">On Hold</a></li>
-    <li class="btn btn-light"><a href="/tvlist?status=dropped">Dropped</a></li>
-    <li class="btn btn-light"><a href="/tvlist?status=planned">Plan to Watch</a></li>
+    <li class="btn btn-outline-secondary"><a href="/tvlist" class="text-decoration-none text-dark">All TV/Movies</a></li>
+    <li class="btn btn-outline-secondary"><a href="/tvlist?status=current" class="text-decoration-none text-dark">Currently Watching</a></li>
+    <li class="btn btn-outline-secondary"><a href="/tvlist?status=completed" class="text-decoration-none text-dark">Completed</a></li>
+    <li class="btn btn-outline-secondary"><a href="/tvlist?status=onhold" class="text-decoration-none text-dark">On Hold</a></li>
+    <li class="btn btn-outline-secondary"><a href="/tvlist?status=dropped" class="text-decoration-none text-dark">Dropped</a></li>
+    <li class="btn btn-outline-secondary"><a href="/tvlist?status=planned" class="text-decoration-none text-dark">Plan to Watch</a></li>
 </ul>
-<table class="w-100">
-    <tr>
-        <th>&nbsp;</th>
+<form action="/search" method="post">
+    <div class="input-group">
+        <input type="search" class="form-control rounded" placeholder="Search" name="search" value="<%= search %>" />
+        <button type="submit" class="btn btn-outline-primary" data-mdb-ripple-init>🔍</button>
+    </div>
+</form>
+<table class="text-center">
+    <tr class="border-bottom">
+        <th></th>
         <th class="ps-2 pe-2">#</th>
-        <th class="ps-2 pe-2">Image</th>
-        <th class="ps-2 pe-2">Title</th>
+        <th class="ps-2 pe-2 col-md-1">Image</th>
+        <th class="ps-2 pe-2 text-start">Title</th>
         <th class="ps-2 pe-2">Score</th>
         <th class="ps-2 pe-2">Type</th>
         <th class="ps-2 pe-2">Progress</th>
+        <th></th>
     </tr>
     <% for (let i = 0; i < data.length; i++) { %>
-        <tr>
+        <tr class="border-bottom">
             <td style="background-color: <%= status_colors[ data[0].status ] %>;">&nbsp;</td>
             <td><%= i+1 %></td>
-            <td><img src="<%= data[0].image %>"></td>
-            <td><%= data[0].title %></td>
+            <td class="btn m-0"><img src="<%= data[0].image %>"></td>
+            <td>
+                <a 
+                    href="https://www.imdb.com/title/<%= data[0].imdb %>/"
+                    class="me-auto fw-bold text-decoration-none fs-5"
+                ><%= data[0].title %></a>
+            </td>
             <td><%= data[0].score %></td>
             <td><%= data[0].type %></td>
             <td>
                 S<%= data[0].progress.season %>
                 E<%= data[0].progress.episode %>
             </td>
+            <td><button onclick="alert(`remove ${data[0].title}?`)">✏️</button></td>
         </tr>
     <% } %>
 </table>
