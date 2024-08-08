@@ -1,12 +1,12 @@
 <div class="d-flex justify-content-end">
-    <a href="/" class="me-auto">Home</a>
+    <a href="/" class="me-auto text-decoration-none fw-bold fs-5">🫛BeanTrack</a>
     <% if (typeof authenticated !== "undefined") { %>
         <% if (typeof username !== "undefined") { %>
-            Hi <%= username %>!
+            <div class="mt-1 me-2">Hello <span class="fw-bold"><%= username %></span>!</div>
         <% } %>
-        <button><a href="/logout">Logout</a></button>
+        <a href="/logout" class="btn btn-danger">Logout</a>
     <% } else { %>
-        <button><a href="/login">Login</a></button>
-        <button><a href="/signup">Sign Up</a></button>
+        <a href="/login" class="btn btn-dark rounded-0">Login</a>
+        <a href="/signup" class="btn btn-secondary rounded-0">Sign Up</a>
     <% } %>
 </div>

@@ -1,12 +1,17 @@
+<!-- add new -->
+<div class="d-flex justify-content-end">
+    <a class="btn btn-outline-secondary" href="/addShow" id="d08f7ea0-d1df-4106-9434-844e1acffbfb">➕ Add Show</a>
+</div>
+
 <!-- filters -->
-<ul class="btn-group w-100 m-0 p-0">
-    <li class="btn btn-outline-secondary"><a href="/tvlist" class="text-decoration-none text-dark">All TV/Movies</a></li>
-    <li class="btn btn-outline-secondary"><a href="/tvlist?status=current" class="text-decoration-none text-dark">Currently Watching</a></li>
-    <li class="btn btn-outline-secondary"><a href="/tvlist?status=completed" class="text-decoration-none text-dark">Completed</a></li>
-    <li class="btn btn-outline-secondary"><a href="/tvlist?status=onhold" class="text-decoration-none text-dark">On Hold</a></li>
-    <li class="btn btn-outline-secondary"><a href="/tvlist?status=dropped" class="text-decoration-none text-dark">Dropped</a></li>
-    <li class="btn btn-outline-secondary"><a href="/tvlist?status=planned" class="text-decoration-none text-dark">Plan to Watch</a></li>
-</ul>
+<div class="btn-group w-100 m-0 p-0">
+    <a href="/tvlist" class="btn btn-outline-secondary text-decoration-none text-dark">All TV/Movies</a>
+    <a href="/tvlist?status=current" class="btn btn-outline-secondary text-decoration-none text-dark">Currently Watching</a>
+    <a href="/tvlist?status=completed" class="btn btn-outline-secondary text-decoration-none text-dark">Completed</a>
+    <a href="/tvlist?status=onhold" class="btn btn-outline-secondary text-decoration-none text-dark">On Hold</a>
+    <a href="/tvlist?status=dropped" class="btn btn-outline-secondary text-decoration-none text-dark">Dropped</a>
+    <a href="/tvlist?status=planned" class="btn btn-outline-secondary text-decoration-none text-dark">Plan to Watch</a>
+</div>
 <form action="/search" method="post">
     <div class="input-group">
         <input type="search" class="form-control rounded" placeholder="Search" name="search" value="<%= search %>" />
@@ -14,16 +19,20 @@
     </div>
 </form>
 <table class="text-center">
-    <tr class="border-bottom">
-        <th></th>
-        <th class="ps-2 pe-2">#</th>
-        <th class="ps-2 pe-2 col-md-1">Image</th>
-        <th class="ps-2 pe-2 text-start">Title</th>
-        <th class="ps-2 pe-2">Score</th>
-        <th class="ps-2 pe-2">Type</th>
-        <th class="ps-2 pe-2">Progress</th>
-        <th></th>
-    </tr>
+    <% if (data.length !== 0) { %>
+        <tr class="border-bottom">
+            <th></th>
+            <th class="ps-2 pe-2">#</th>
+            <th class="ps-2 pe-2 col-md-1">Image</th>
+            <th class="ps-2 pe-2 text-start">Title</th>
+            <th class="ps-2 pe-2">Score</th>
+            <th class="ps-2 pe-2">Type</th>
+            <th class="ps-2 pe-2">Progress</th>
+            <th></th>
+        </tr>
+    <% } else { %>
+        <div class="text-center">It's awfully quiet here ... 🦗</div>
+    <% }%>
     <% for (let i = 0; i < data.length; i++) { %>
         <tr class="border-bottom">
             <td style="background-color: <%= status_colors[ data[0].status ] %>;">&nbsp;</td>
@@ -45,3 +54,13 @@
         </tr>
     <% } %>
 </table>
+
+<!-- <script>
+    function addShow() {
+        count++;
+        console.log(count);
+    }
+
+    const addShowButton = document.getElementById("d08f7ea0-d1df-4106-9434-844e1acffbfb");
+    addShowButton.addEventListener("click", addShow);
+</script> -->

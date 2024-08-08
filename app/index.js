@@ -22,7 +22,7 @@ const status_colors = {
 	"planned" : "#c3c3c3"
 }
 
-let clientside_userdata = [
+const clientside_userdata = [
     {
         "status" : "onhold",
         "image" : "https://static.tvmaze.com/uploads/images/medium_portrait/504/1262336.jpg",
@@ -35,7 +35,9 @@ let clientside_userdata = [
             "episode" : (9)
         }
     }
-];
+]
+
+let addShowData = [];
 /* #endregion variables */
 
 /* #region app init */
@@ -241,6 +243,45 @@ app.get('/tvlist', sessionValidation, (req, res) => {
         search: search
     });
 });
+
+app.post('/searchShow', async (req, res) => {
+    const search = req.body.search;
+    await fetch(`https://api.tvmaze.com/search/shows?q=${search}`)
+        .then((res) => res.json())
+        .then((data) => {
+            for (let i = 0; i < data.length; i++) {
+                addShowData.push({
+                    "image": data[i].show.image.medium,
+                    "title": data[i].show.name,
+                    "imdb": data[i].show.externals.imdb,
+                    "summary": formatSummary(data[i].show.summary),
+                    "score": data[i].show.rating.average,
+                    "type": "TV",
+                });
+            }
+
+            res.send(addShowData);
+            return;
+        })
+    
+    return;
+
+    res.redirect(`/addShow?search=${search}`);
+});
+
+app.get('/addShow', sessionValidation, (req, res) => {
+    const search = req.query.search ? req.query.search : "";
+
+    res.render("addshow", {
+        username: req.session.username,
+        authenticated: req.session.authenticated,
+        search: search,
+    });
+});
+
+function formatSummary(str) {
+    return str;
+}
 
 app.get('*', (req, res) => {
     res.status(404).render("404", {

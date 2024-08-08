@@ -1,0 +1,11 @@
+<%- include('components/header', { 
+    authenticated : authenticated,
+    username : username
+ }) %>
+<form action="/searchShow" method="post">
+    <div class="input-group">
+        <input type="search" class="form-control rounded" placeholder="Search" name="search" value="<%= search %>" />
+        <button type="submit" class="btn btn-outline-primary" data-mdb-ripple-init>🔍</button>
+    </div>
+</form>
+<%- include('components/footer') %>

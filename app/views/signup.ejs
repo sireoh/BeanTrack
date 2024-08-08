@@ -3,9 +3,11 @@
   <% if (typeof errors !== 'undefined' && errors !== null) { %>
     <%= errors %>
   <% } %>
-  Sign Up
-  <input name="username" type="text" placeholder="username">
-  <input name="password" type="password" placeholder="password">
-  <button type="submit">Submit</button>
+  <div class="input-group">
+    <label class="mt-2 me-2">Sign Up</label>
+    <input name="username" class="form-control" type="text" placeholder="username">
+    <input name="password" class="form-control" type="password" placeholder="password">
+    <button type="submit" class="btn btn-outline-secondary rounded-0">Submit</button>
+  </div>
 </form>
 <%- include('components/footer') %>
