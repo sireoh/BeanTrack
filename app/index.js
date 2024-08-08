@@ -22,7 +22,20 @@ const status_colors = {
 	"planned" : "#c3c3c3"
 }
 
-let clientside_userdata = [];
+let clientside_userdata = [
+    {
+        "status" : "onhold",
+        "image" : "https://static.tvmaze.com/uploads/images/medium_portrait/504/1262336.jpg",
+        "title" : "Severance",
+        "imdb" : "tt11280740",
+        "score" : 7.8,
+        "type" : "TV",
+        "progress" : {
+            "season" : (1),
+            "episode" : (9)
+        }
+    }
+];
 /* #endregion variables */
 
 /* #region app init */
@@ -208,12 +221,15 @@ app.get('/tvlist', sessionValidation, (req, res) => {
         filtered_data = clientside_userdata.filter((item) => {
             return item.status === req.query.status;
         });
-        // console.log(filtered_data);
     }
 
     if (search !== "") {
         filtered_data = clientside_userdata.filter((item) => {
-            return item.title.toLowerCase() === search;
+            if (item.title.toLowerCase() === search) {
+                return true;
+            }
+
+            return item.title.toLowerCase().startsWith(search);
         });
     }
 
