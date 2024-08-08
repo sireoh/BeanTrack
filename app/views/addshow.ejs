@@ -8,4 +8,27 @@
         <button type="submit" class="btn btn-outline-primary" data-mdb-ripple-init>🔍</button>
     </div>
 </form>
+
+<% if (typeof data !== "undefined" && data.length > 0) { %>
+    <table class="w-100">
+        <tr>
+            <th>Image</th>
+            <th>Title</th>
+            <th>Summary</th>
+            <th>Score</th>
+        </tr>
+        <% for (let i = 0; i < data.length; i++) { %>
+            <tr>
+                <td><img src="<%= data[i].image %>" height="128px" /></td>
+                <td>
+                    <a href="https://www.imdb.com/title/<%= data[i].imdb %>/" class="text-decoration-none fw-bold"><%= data[i].title %></a>
+                </td>
+                <td><%- data[i].summary %></td>
+                <td><%= data[i].score %></td>
+            </tr>
+        <% } %>
+    </table>
+<% } %>
+
+
 <%- include('components/footer') %>

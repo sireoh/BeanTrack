@@ -36,8 +36,6 @@ const clientside_userdata = [
         }
     }
 ]
-
-let addShowData = [];
 /* #endregion variables */
 
 /* #region app init */
@@ -51,6 +49,7 @@ const {
     userCollection,
     mongoSessions
 } = require('./scripts/databaseConnection');
+const { format } = require("path");
 
 app.use(
     session({
@@ -249,38 +248,44 @@ app.post('/searchShow', async (req, res) => {
     await fetch(`https://api.tvmaze.com/search/shows?q=${search}`)
         .then((res) => res.json())
         .then((data) => {
+            let addShowData = [];
+
             for (let i = 0; i < data.length; i++) {
+                const img = data[i].show.image ? data[i].show.image.medium : "";
+                
                 addShowData.push({
-                    "image": data[i].show.image.medium,
+                    "image": img,
                     "title": data[i].show.name,
                     "imdb": data[i].show.externals.imdb,
                     "summary": formatSummary(data[i].show.summary),
-                    "score": data[i].show.rating.average,
-                    "type": "TV",
+                    "score": data[i].show.rating.average
                 });
             }
 
-            res.send(addShowData);
-            return;
-        })
-    
-    return;
-
-    res.redirect(`/addShow?search=${search}`);
+            res.render("addshow", {
+                username: req.session.username,
+                authenticated: req.session.authenticated,
+                search: search,
+                data: addShowData
+            });
+        });
 });
 
-app.get('/addShow', sessionValidation, (req, res) => {
+app.get('/addShow', (req, res) => {
     const search = req.query.search ? req.query.search : "";
 
     res.render("addshow", {
         username: req.session.username,
         authenticated: req.session.authenticated,
-        search: search,
+        search: search
     });
 });
 
 function formatSummary(str) {
-    return str;
+    return str
+    .replace(/<\/?[^>]+(>|$)/g, "")
+    .substring(0, 80)
+    + (str.length > 80 ? " ..." : "");
 }
 
 app.get('*', (req, res) => {
