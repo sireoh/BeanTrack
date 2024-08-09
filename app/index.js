@@ -69,7 +69,6 @@ function sessionValidation(req, res, next) {
 app.get('/', async (req, res) => {
     const authenticated = req.session.authenticated;
     const search = req.query.search ? req.query.search : "";
-    let filtered_data = req.session.userData ? req.session.userData : [];
 
     if (!authenticated) {
         res.render("landing", {
@@ -79,27 +78,46 @@ app.get('/', async (req, res) => {
         return;
     }
 
-    const result = await userCollection
-        .find({username: req.session.username})
-        .project({ user_data: 1})
-        .toArray();
-
-    filtered_data = result[0].user_data;
-    req.session.userData = filtered_data;
-
-    if (search !== "") {
-        filtered_data.filter((item) => {
-            return item.title.toLowerCase() === search;
-        });
+    const url = 'https://api.themoviedb.org/3/trending/tv/day?language=en-US';
+    const options = {
+    method: 'GET',
+    headers: {
+        accept: 'application/json',
+        Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxZGM0MDE1OWIzNWZiZTRjZDg4MDAwODZiMjA5YTI3NSIsIm5iZiI6MTcyMzE2MDMwNy42ODY1MzQsInN1YiI6IjY2OWY2MjY2YTVhYjlkOWYzZDcwMzVmNiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.KV1NO_XnwxQIIw7xs6hZgAG_5EjRKwAQvD-jtLJvb2M'
     }
+    };
 
-    res.render("index", {
-        username: req.session.username,
-        authenticated: authenticated,
-        status_colors: status_colors,
-        data: filtered_data,
-        search: search
-    });
+    fetch(url, options)
+        .then(res => res.json())
+        .then(async (data) => {
+            let buildData = [];
+
+            for (let i = 0; i < data.results.length; i++) {
+                // const imdb = await getIMDB(data.results[i].name, data.results[i].id);
+
+                buildData.push({
+                    "id": data.results[i].id,
+                    "image": `https://image.tmdb.org/t/p/w500${data.results[i].poster_path}`,
+                    "title": data.results[i].name,
+                    // "imdb": `${imdb}`,
+                    "summary": formatSummary(data.results[i].overview),
+                    "score": data.results[i].vote_average
+                });            
+            }
+            showDataResults = buildData;
+            
+            // res.send(buildData);
+            // return;
+
+            res.render("index", {
+                username: req.session.username,
+                authenticated: authenticated,
+                status_colors: status_colors,
+                data: buildData,
+                search: search
+            });
+    })
+    .catch(err => console.error('error:' + err));
 });
 
 /* #region signup */
@@ -237,7 +255,9 @@ app.get('/tvlist', sessionValidation, async (req, res) => {
         });
     }
 
-    res.render("index", {
+    console.log(filtered_data);
+
+    res.render("tvlist", {
         username: req.session.username,
         authenticated: req.session.authenticated,
         status_colors: status_colors,
@@ -257,14 +277,18 @@ app.post('/searchShow', async (req, res) => {
                 const img = data[i].show.image ? data[i].show.image.medium : "";
                 const summary = data[i].show ? data[i].show.summary : "";
                 
-                showDataResults.push({
-                    "id": data[i].show.id,
-                    "image": img,
-                    "title": data[i].show.name,
-                    "imdb": data[i].show.externals.imdb,
-                    "summary": formatSummary(summary),
-                    "score": data[i].show.rating.average
-                });
+                try {
+                    showDataResults.push({
+                        "id": data[i].show.id,
+                        "image": img,
+                        "title": data[i].show.name,
+                        "imdb": data[i].show.externals.imdb,
+                        "summary": formatSummary(summary),
+                        "score": data[i].show.rating.average
+                    });
+                } catch (error) {
+                    // console.log(data[i]);
+                }
             }
 
             res.redirect(`/showResults?search=${search}`);
@@ -274,6 +298,10 @@ app.post('/searchShow', async (req, res) => {
 app.get('/showResults', (req, res) => {
     const search = req.query.search ? req.query.search : "";
 
+    if (!search) {
+        showDataResults = [];
+    }
+
     res.render("showResults", {
         username: req.session.username,
         authenticated: req.session.authenticated,
@@ -281,13 +309,6 @@ app.get('/showResults', (req, res) => {
         data: showDataResults
     });
 });
-
-function formatSummary(str) {
-    return str
-    .replace(/<\/?[^>]+(>|$)/g, "")
-    .substring(0, 80)
-    + (str.length > 80 ? " ..." : "");
-}
 
 app.get('/addShow', (req, res) => {
     const id = req.query.id;
@@ -298,6 +319,7 @@ app.get('/addShow', (req, res) => {
     userCollection.updateOne(
         { username: req.session.username },
         { $push: { user_data: {
+            "id": data[0].id,
             "status": req.query.status,
             "image": data[0].image,
             "title": data[0].title,
@@ -312,6 +334,34 @@ app.get('/addShow', (req, res) => {
 
     res.redirect("/tvlist");
 });
+
+function formatSummary(str) {
+    return str
+    .replace(/<\/?[^>]+(>|$)/g, "")
+    .substring(0, 80)
+    + (str.length > 80 ? " ..." : "");
+}
+
+async function getIMDB(name, id) {
+    const url = `https://api.themoviedb.org/3/movie/${id}/external_ids`;
+    const options = {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+        Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxZGM0MDE1OWIzNWZiZTRjZDg4MDAwODZiMjA5YTI3NSIsIm5iZiI6MTcyMzE2MDMwNy42ODY1MzQsInN1YiI6IjY2OWY2MjY2YTVhYjlkOWYzZDcwMzVmNiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.KV1NO_XnwxQIIw7xs6hZgAG_5EjRKwAQvD-jtLJvb2M'
+      }
+    };
+    
+    try {
+        const response = await fetch(url, options);
+        const data = await response.json();
+        console.log(name, id, data.imdb_id);
+        return data.imdb_id || null;
+    } catch (err) {
+        console.error('Error:', err);
+        return null;
+    }
+}
 
 app.get('*', (req, res) => {
     res.status(404).render("404", {

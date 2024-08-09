@@ -51,7 +51,11 @@
                 S<%= data[i].progress.season %>
                 E<%= data[i].progress.episode %>
             </td>
-            <td><button onclick="alert(`remove ${data[0].title}?`)">✏️</button></td>
+            <td class="btn-group mt-4">
+                <a href="/editShow?id=<%= data[i].id %>&status=completed" class="btn btn-outline-primary">✅ Completed</a>
+                <a href="/editShow?id=<%= data[i].id %>&status=current" class="btn btn-outline-primary">🌊 Current</a>
+                <a href="/editShow?id=<%= data[i].id %>&status=planned" class="btn btn-outline-secondary">🪴 Planned</a>
+            </td>
         </tr>
     <% } %>
 </table>
