@@ -28,6 +28,7 @@ function addInitEvents() {
 
 function createTable(data) {
   let str = "";
+  localData = [];
   for (let i = 0; i < data.length; i++) {
     const img = data[i].show.image ? data[i].show.image.medium : "";
 
@@ -52,6 +53,7 @@ function createTable(data) {
       str += `
         </tr>
       </table>`;
+
       localData.push({
         "id" : data[i].show.id,
         "status" : "",
@@ -69,8 +71,8 @@ function createTable(data) {
 }
 
 function Add(i) {
-  const status = getStatus(i);
-  console.log(localData[i], status);
+  localData[i].status = getStatus(i);
+  postData(localData[i]);
 }
 
 function getStatus(i) {
