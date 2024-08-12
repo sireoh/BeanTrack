@@ -1,16 +1,16 @@
 <!-- add new -->
 <div class="d-flex justify-content-end">
-    <a class="btn btn-outline-secondary" href="/showResults" id="d08f7ea0-d1df-4106-9434-844e1acffbfb">➕ Add Show</a>
+    <a class="btn btn-outline-secondary" id="VLTLkGETmEqX7tjiClvJjw">➕ Add Show</a>
 </div>
 
 <!-- filters -->
 <div class="btn-group w-100 m-0 p-0">
-    <a href="/tvlist" class="btn btn-outline-secondary text-decoration-none text-dark">All TV/Movies</a>
-    <a href="/tvlist?status=current" class="btn btn-outline-secondary text-decoration-none text-dark">Currently Watching</a>
-    <a href="/tvlist?status=completed" class="btn btn-outline-secondary text-decoration-none text-dark">Completed</a>
-    <a href="/tvlist?status=onhold" class="btn btn-outline-secondary text-decoration-none text-dark">On Hold</a>
-    <a href="/tvlist?status=dropped" class="btn btn-outline-secondary text-decoration-none text-dark">Dropped</a>
-    <a href="/tvlist?status=planned" class="btn btn-outline-secondary text-decoration-none text-dark">Plan to Watch</a>
+    <a href="/tvlist/<%= username %>" class="btn btn-outline-secondary text-decoration-none text-dark">All TV/Movies</a>
+    <a href="/tvlist/<%= username %>?status=current" class="btn btn-outline-secondary text-decoration-none text-dark">Currently Watching</a>
+    <a href="/tvlist/<%= username %>?status=completed" class="btn btn-outline-secondary text-decoration-none text-dark">Completed</a>
+    <a href="/tvlist/<%= username %>?status=onhold" class="btn btn-outline-secondary text-decoration-none text-dark">On Hold</a>
+    <a href="/tvlist/<%= username %>?status=dropped" class="btn btn-outline-secondary text-decoration-none text-dark">Dropped</a>
+    <a href="/tvlist/<%= username %>?status=planned" class="btn btn-outline-secondary text-decoration-none text-dark">Plan to Watch</a>
 </div>
 <form action="/search" method="post">
     <div class="input-group">
@@ -24,10 +24,12 @@
             <th></th>
             <th class="ps-2 pe-2">#</th>
             <th class="ps-2 pe-2 col-md-1">Image</th>
-            <th class="ps-2 pe-2 text-start">Title</th>
+            <th class="ps-2 pe-2">Title</th>
             <th class="ps-2 pe-2">Score</th>
             <th class="ps-2 pe-2">Type</th>
-            <th class="ps-2 pe-2">Progress</th>
+            <% if (data[0].progress.length > 1) { %>
+                <th class="ps-2 pe-2">Progress</th>
+            <% } %>
             <th></th>
         </tr>
     <% } else { %>
@@ -48,24 +50,33 @@
             <td><%= data[i].score %></td>
             <td><%= data[i].type %></td>
             <td>
-                S<%= data[i].progress.season %>
-                E<%= data[i].progress.episode %>
+                <% if (data[i].progress.length > 1) { %>
+                    <span class="fw-bold">
+                        S<%= data[i].progress.season %>&nbsp;
+                        E<%= data[i].progress.episode %>
+                    </span>
+                <% } %>
             </td>
-            <td class="btn-group mt-4">
-                <a href="/editShow?id=<%= data[i].id %>&status=completed" class="btn btn-outline-primary">✅ Completed</a>
-                <a href="/editShow?id=<%= data[i].id %>&status=current" class="btn btn-outline-primary">🌊 Current</a>
-                <a href="/editShow?id=<%= data[i].id %>&status=planned" class="btn btn-outline-secondary">🪴 Planned</a>
-            </td>
+            <td><a href="#" class="rHdkJvYyW0u1OTH9XOi7nQ">Edit</a></td>
         </tr>
     <% } %>
 </table>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const editButtons = document.getElementsByClassName("rHdkJvYyW0u1OTH9XOi7nQ");
+        const addShowButton = document.getElementById("VLTLkGETmEqX7tjiClvJjw");
+        const modal = document.getElementById("ogJCheREvEanzp9ff7DP9Q");
 
-<!-- <script>
-    function addShow() {
-        count++;
-        console.log(count);
-    }
+        for (let i = 0; i < editButtons.length; i++) {
+            const btn = editButtons[i];
+            btn.addEventListener("click", () => {
+                const modal = document.getElementById("ogJCheREvEanzp9ff7DP9Q");
+                modal.classList.toggle("d-none");
+            });
+        }
 
-    const addShowButton = document.getElementById("d08f7ea0-d1df-4106-9434-844e1acffbfb");
-    addShowButton.addEventListener("click", addShow);
-</script> -->
+        addShowButton.addEventListener("click", () => {
+            modal.classList.toggle("d-none");
+        });
+    });
+</script>

@@ -34,9 +34,12 @@ app.use(express.static(__dirname + "/public"));
 /* #region database connection */
 const { 
     userCollection,
+    tvOwnlist,
+    movieOwnlist,
     mongoSessions
 } = require('./scripts/databaseConnection');
 const { format } = require("path");
+const { stat } = require("fs");
 
 app.use(
     session({
@@ -46,6 +49,7 @@ app.use(
         store: mongoSessions,
     }),
 );
+app.use(express.json());
 /* #endregion database connection */
 
 /* #region authentication */
@@ -222,21 +226,31 @@ app.get('/logOut', (req, res) => {
 });
 /* #endregion login */
 
-app.post('/search', (req, res) => {
+app.post('/searchOwnlist', (req, res) => {
     const search = req.body.search;
-    res.redirect(`/tvlist?search=${search}`);
+    res.redirect(`/tvlist/${req.session.username}?search=${search}`);
 });
 
-app.get('/tvlist', sessionValidation, async (req, res) => {
+app.get('/tvlist/?:id', sessionValidation, async (req, res) => {
+    const id = req.params.id;
     const search = req.query.search ? req.query.search : "";
     let filtered_data = req.session.userData ? req.session.userData : [];
 
-    const result = await userCollection
-    .find({username: req.session.username})
-    .project({ user_data: 1})
-    .toArray();
+    const getTVObjID = await userCollection
+        .find({ username: id })
+        .project({ tvlist: 1})
+        .toArray();
 
-    filtered_data = result[0].user_data;
+    if (getTVObjID.length === 0) {
+        return;
+    }
+
+    const result = await tvOwnlist
+        .find({ _id: getTVObjID[0].tvlist })
+        .project({ data: 1})
+        .toArray();
+
+    filtered_data = result[0].data;
     req.session.userData = filtered_data;
 
     if (req.query.status) {
@@ -247,7 +261,8 @@ app.get('/tvlist', sessionValidation, async (req, res) => {
 
     if (search !== "") {
         filtered_data = req.session.userData.filter((item) => {
-            if (item.title.toLowerCase() === search) {
+            // TODO: diacritics dont work ...
+            if (item.title.toLowerCase().normalize("NFD") === search) {
                 return true;
             }
 
@@ -255,13 +270,15 @@ app.get('/tvlist', sessionValidation, async (req, res) => {
         });
     }
 
-    console.log(filtered_data);
+    const alphabeticalData = filtered_data.sort( compareTitle );
+    
+    const dataByStatus = alphabeticalData.sort( compareStatus );
 
     res.render("tvlist", {
         username: req.session.username,
         authenticated: req.session.authenticated,
         status_colors: status_colors,
-        data: filtered_data,
+        data: dataByStatus,
         search: search
     });
 });
@@ -310,7 +327,14 @@ app.get('/showResults', (req, res) => {
     });
 });
 
+app.post('/addShow', (req, res) => {
+    console.log(req.body.data);
+});
+
 app.get('/addShow', (req, res) => {
+    res.send(req.data);
+    return;
+
     const id = req.query.id;
     const data = showDataResults.filter((item) => {
         return item.id == id;
@@ -361,6 +385,28 @@ async function getIMDB(name, id) {
         console.error('Error:', err);
         return null;
     }
+}
+
+function compareTitle(a, b) {
+    if ( a.title < b.title ){
+        return -1;
+      }
+      if ( a.title > b.title ){
+        return 1;
+      }
+      return 0;
+}
+
+function compareStatus(a, b) {
+    const statusOrder = {
+        current: 1,
+        completed: 2,
+        onhold: 3,
+        dropped: 4,
+        planned: 5
+    }
+
+    return statusOrder[a.status] - statusOrder[b.status];
 }
 
 app.get('*', (req, res) => {

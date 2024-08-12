@@ -16,6 +16,8 @@ var database = new MongoClient(atlasURI, {useNewUrlParser: true, useUnifiedTopol
 
 // User and session database
 const userCollection = database.db(mongodb_database).collection('users');
+const tvOwnlist = database.db(mongodb_database).collection('tvlist');
+const movieOwnlist = database.db(mongodb_database).collection('movielist');
 const mongoSessions = MongoStore.create({
 	mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
 	crypto: {
@@ -27,5 +29,7 @@ const mongoSessions = MongoStore.create({
 // Export
 module.exports = { 
     userCollection,
+	tvOwnlist,
+	movieOwnlist,
     mongoSessions
  };
