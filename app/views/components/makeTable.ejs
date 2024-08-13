@@ -28,6 +28,7 @@
             <th class="ps-2 pe-2">Score</th>
             <th class="ps-2 pe-2">Type</th>
             <th></th>
+            <th></th>
         </tr>
     <% } else { %>
         <div class="text-center">It's awfully quiet here ... 🦗</div>
@@ -36,7 +37,7 @@
         <tr class="border-bottom">
             <td style="background-color: <%= status_colors[ data[i].status ] %>;">&nbsp;</td>
             <td><%= i+1 %></td>
-            <td class="m-1"><img src="<%= data[i].image %>" height="128px"></td>
+            <td class="m-1"><img src="<%= data[i].image %>" height="128px" alt=<%= data[i].id %>></td>
             <td>
                 <a 
                     target="_blank"
@@ -46,26 +47,8 @@
             </td>
             <td><%= data[i].score %></td>
             <td><%= data[i].type %></td>
-            <td><a href="#" class="rHdkJvYyW0u1OTH9XOi7nQ">Edit</a></td>
+            <td class="col-md-2"></td>
+            <td><a class="rHdkJvYyW0u1OTH9XOi7nQ" style="cursor: pointer;">Edit</a></td>
         </tr>
     <% } %>
 </table>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const editButtons = document.getElementsByClassName("rHdkJvYyW0u1OTH9XOi7nQ");
-        const addShowButton = document.getElementById("VLTLkGETmEqX7tjiClvJjw");
-        const modal = document.getElementById("ogJCheREvEanzp9ff7DP9Q");
-
-        for (let i = 0; i < editButtons.length; i++) {
-            const btn = editButtons[i];
-            btn.addEventListener("click", () => {
-                const modal = document.getElementById("ogJCheREvEanzp9ff7DP9Q");
-                modal.classList.toggle("d-none");
-            });
-        }
-
-        addShowButton.addEventListener("click", () => {
-            modal.classList.toggle("d-none");
-        });
-    });
-</script>

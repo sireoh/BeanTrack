@@ -265,6 +265,10 @@ app.post('/addMovie', async (req, res) => {
    console.log(req.body);
 });
 
+app.post('/editItem', async (req, res) => {
+    console.log(req.body);
+ });
+
 app.get('*', (req, res) => {
     res.status(404).render("404", {
         authenticated: req.session.authenticated,

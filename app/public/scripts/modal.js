@@ -1,19 +1,12 @@
-const closeButton = document.getElementById("gSPgxfT1gEmsaW1oDiiFXw");
-const modal = document.getElementById("ogJCheREvEanzp9ff7DP9Q");
 const typeToggle = document.getElementById("sBthW1RpFUy70uMUe8pfNQ");
 const searchButton = document.getElementById("v4GHrhIRr0WfIPjsPMjCbQ");
 const resultPreview = document.getElementById("KErxjUJ1BUaXmJd7acF0TA");
-const modalBG = document.getElementById("ogJCheREvEanzp9ff7DP9Q");
 
 const OMDB_KEY = "b05a38fc";
 let currentType = "TV";
 let localData = [];
 
-function addInitEvents() {
-  closeButton.addEventListener("click", () => {
-    modal.classList.toggle("d-none");
-  });
-
+function initModalEvents() {
   typeToggle.addEventListener("click", (event) => {
     const children = Array.from(event.target.parentNode.children);
 
@@ -194,8 +187,8 @@ async function searchFn(event) {
   }
 }
 
-function setup() {
-  addInitEvents();
+function setupModalEvents() {
+  initModalEvents();
 
   searchButton.addEventListener("click", (event) => {
     searchFn(event);
@@ -203,4 +196,4 @@ function setup() {
 }
 
 //Load Setup
-document.addEventListener("DOMContentLoaded", setup());
+document.addEventListener("DOMContentLoaded", setupModalEvents());
