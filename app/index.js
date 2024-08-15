@@ -41,7 +41,7 @@ const {
     tvOwnlist,
     movieOwnlist,
     mongoSessions
-} = require('./scripts/databaseConnection');
+} = require(__dirname + '/scripts/databaseConnection');
 const { format } = require("path");
 const { stat } = require("fs");
 
