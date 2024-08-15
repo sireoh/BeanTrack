@@ -149,7 +149,7 @@ async function createMovieTable(search, data) {
   }
   console.log(local_movieownlist);
 
-  if (data.length < 1) {
+  if (!data) {
     resultPreview.innerHTML = `
     <div class="text-center mt-3">It's kinda quiet here ... 🦗</div>`;
     return;
