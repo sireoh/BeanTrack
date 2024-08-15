@@ -39,7 +39,7 @@ function setYesButton(selectform, node, data) {
     const entireDiv = selectform.parentNode.parentNode;
 
     node.addEventListener("click", () => {
-        fetch('http://localhost:3000/editItem', {  
+        fetch(`${window.location.origin}/editItem`, {  
             method: 'post',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ data })

@@ -42,7 +42,7 @@ async function checkOwnListData() {
     return;
   }
 
-  const url = `http://localhost:3000/ownlist/${id}?type=${type}`;
+  const url = `${window.location.origin}/ownlist/${id}?type=${type}`;
   try {
     const res = await fetch(url);
     const data = await res.json();
@@ -251,7 +251,7 @@ function getStatus(i) {
 }
 
 function postData(data) {
-  fetch('http://localhost:3000/addShow', {  
+  fetch(`${window.location.origin}/addShow`, {  
     method: 'post',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({ data })
@@ -261,7 +261,7 @@ function postData(data) {
 }
 
 function postMovieData(data) {
-  fetch('http://localhost:3000/addMovie', {  
+  fetch(`${window.location.origin}/addMovie`, {  
     method: 'post',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({ data })
