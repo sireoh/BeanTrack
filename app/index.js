@@ -318,28 +318,35 @@ app.get('/ownlist/?:id', sessionValidation, async (req, res) => {
         return;
     }
 
-    if (type === "tv") {
-        const getTVObjID = await userCollection
+    const getOwnlists = await userCollection
         .find({ username: id })
-        .project({ tvlist: 1})
+        .project({ tvlist: 1, movielist: 1 })
         .toArray();
 
-        if (getTVObjID.length === 0) {
-            return;
-        } else {
-            req.session.tvOwnlist = getTVObjID[0].tvlist;
-        }
+    if (getOwnlists.length === 0) {
+        return;
+    }
+
+    if (type === "tv") {
+        req.session.tvOwnlist = getOwnlists[0].tvlist;
 
         const result = await tvOwnlist
             .find({ _id: req.session.tvOwnlist })
-            .project({ data: 1})
+            .project({ data: 1 })
             .toArray();
 
         res.send(result[0].data);
         return;
 
     } else if (type === "movie") {
-        res.send({message: "Movie data goes here ..."});
+        req.session.movieOwnlist = getOwnlists[0].movielist;
+
+        const result = await movieOwnlist
+            .find({ _id: req.session.movieOwnlist })
+            .project({ data: 1 })
+            .toArray();
+
+        res.send(result[0].data);
         return;
     }
 

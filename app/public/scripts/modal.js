@@ -30,15 +30,19 @@ function initModalEvents() {
 
 async function checkOwnListData() {
   const currentURL = window.location.href;
-  let id = null;
+  let id, type;
 
-  if (!currentURL.includes("/tvlist/")) {
-    return;
-  } else {
+  if (currentURL.includes("/movielist/")) {
+    id = currentURL.split("/movielist/")[1].split("?")[0];
+    type = "movie";
+  } else if (currentURL.includes("/tvlist/")) {
     id = currentURL.split("/tvlist/")[1].split("?")[0];
+    type = "tv";
+  } else {
+    return;
   }
 
-  const url = `http://localhost:3000/ownlist/${id}?type=tv`;
+  const url = `http://localhost:3000/ownlist/${id}?type=${type}`;
   try {
     const res = await fetch(url);
     const data = await res.json();
@@ -129,10 +133,33 @@ async function createTVTable(search, data) {
   }
 }
 
-function createMovieTable(data) {
+async function createMovieTable(search, data) {
+  if (easterEggs.hasOwnProperty(search)) {
+    resultPreview.innerHTML = `<div class="text-center">${easterEggs[search]}</div>`;
+    return;
+  }
+
+  let local_movieownlist;
+
+  try {
+    const temp = await checkOwnListData();
+    local_movieownlist = temp;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+  console.log(local_movieownlist);
+
+  if (data.length < 1) {
+    resultPreview.innerHTML = `
+    <div class="text-center mt-3">It's kinda quiet here ... 🦗</div>`;
+    return;
+  }
+
   let str = "";
   localData = [];
   for (let i = 0; i < data.length; i++) {
+    let found = false;
+
     try {
       str += `
       <table class="text-center w-100">
@@ -140,15 +167,29 @@ function createMovieTable(data) {
 
       str += `
           <td class="col-md-1"><img src="${ data[i].Poster }" alt="${ data[i].imdbID.substring(2) }" height="128px" width="auto"/></td>
-          <td class="me-auto fw-bold text-decoration-none fs-5"><a href="https://www.imdb.com/title/${ data[i].imdbID }/" target="_blank">${ data[i].Title }</a></td>
-          <td class="col-md-3">
-            <select class="form-select" id="CF5fHFw7ekmcDo58yqh27A${i}">
-              <option value="completed" selected>Completed</option>
-              <option value="planned">Plan to Watch</option>
-              <option value="current">Currently Watching</option>
-            </select>
-          </td>
-          <td class="col-md-1"><button class="btn btn-primary" onclick="AddMovie(event, ${i})">Add</button></td>`;
+          <td class="me-auto fw-bold text-decoration-none fs-5"><a href="https://www.imdb.com/title/${ data[i].imdbID }/" target="_blank">${ data[i].Title }</a></td>`;
+
+      for (let j = 0; j < local_movieownlist.length; j++) {
+        if (local_movieownlist[j].imdb == data[i].imdbID) {
+          found = true;
+        }
+      }
+
+      if (!found) {
+        str += `
+        <td class="col-md-3">
+          <select class="form-select" id="CF5fHFw7ekmcDo58yqh27A${i}">
+            <option value="completed" selected>Completed</option>
+            <option value="planned">Plan to Watch</option>
+            <option value="current">Currently Watching</option>
+          </select>
+        </td>
+        <td class="col-md-1"><button class="btn btn-primary" onclick="AddTV(event, ${i})">Add</button></td>`;
+      } else {
+        str += `
+        <td class="col-md-3"></td>
+        <td class="col-md-1"><button class="btn btn-secondary" disabled>Added</button></td>`;
+      }
 
       str += `
         </tr>
@@ -242,7 +283,7 @@ async function searchFn(event) {
     const url = `http://www.omdbapi.com/?s=${search}&apikey=${OMDB_KEY}`;
     await fetch(url)
     .then((res) => res.json())
-    .then((data) => { createMovieTable(data.Search) })
+    .then((data) => { createMovieTable(search, data.Search) })
     .catch((error) => {
       if (error) {
         resultPreview.innerHTML = `
