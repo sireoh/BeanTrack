@@ -1,6 +1,7 @@
 // Imports
 require('dotenv').config();
 const { ObjectId } = require("mongodb");
+const NumberInt = require("mongodb").Int32;
 const MongoClient = require("mongodb").MongoClient;
 const MongoStore = require('connect-mongo');
 
@@ -30,6 +31,7 @@ const mongoSessions = MongoStore.create({
 // Export
 module.exports = { 
 	ObjectId,
+	NumberInt,
     userCollection,
 	tvOwnlist,
 	movieOwnlist,

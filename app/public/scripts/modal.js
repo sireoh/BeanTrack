@@ -1,6 +1,12 @@
 const typeToggle = document.getElementById("sBthW1RpFUy70uMUe8pfNQ");
 const searchButton = document.getElementById("v4GHrhIRr0WfIPjsPMjCbQ");
 const resultPreview = document.getElementById("KErxjUJ1BUaXmJd7acF0TA");
+const easterEggs = {
+  "ur mom": "hey! thats not very nice ... 😡",
+  "pog": "pog 🦥",
+  "im depressed": "well, im sorry to hear that, but remember this is a tv searching platform ... not google 🥺",
+  "ur cute": "no u ... 👉👶"
+};
 
 const OMDB_KEY = "b05a38fc";
 let currentType = "TV";
@@ -43,7 +49,12 @@ async function checkOwnListData() {
   }
 }
 
-async function createTVTable(data) {
+async function createTVTable(search, data) {
+  if (easterEggs.hasOwnProperty(search)) {
+    resultPreview.innerHTML = `<div class="text-center">${easterEggs[search]}</div>`;
+    return;
+  }
+
   let local_tvownlist;
 
   try {
@@ -73,7 +84,7 @@ async function createTVTable(data) {
 
       str += `
           <td class="col-md-1"><img src="${img}" alt="${data[i].show.id}" height="128px" width="auto"/></td>
-          <td class="me-auto fw-bold text-decoration-none fs-5"><a href="https://www.imdb.com/title/${data[i].show.externals.imdb}/" target="_blank">${data[i].show.name}</a></td>
+          <td><a href="https://www.imdb.com/title/${data[i].show.externals.imdb}/" target="_blank" class="me-auto fw-bold text-decoration-none fs-5">${data[i].show.name}</a></td>
           <td class=""><div>${data[i].show.rating.average}</div></td>`;
 
       for (let j = 0; j < local_tvownlist.length; j++) {
@@ -226,7 +237,7 @@ async function searchFn(event) {
   if (currentType === "TV") {
     await fetch(`https://api.tvmaze.com/search/shows?q=${search}`)
     .then((res) => res.json())
-    .then((data) => { createTVTable(data) });
+    .then((data) => { createTVTable(search, data) });
   } else {
     const url = `http://www.omdbapi.com/?s=${search}&apikey=${OMDB_KEY}`;
     await fetch(url)

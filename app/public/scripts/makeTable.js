@@ -23,7 +23,8 @@ function editItem(event) {
                     document.getElementById("ZFreIdeaoUydMMbVK4q5fg"),
                     {
                         id: id,
-                        newStatus: arr[i].value
+                        newStatus: arr[i].value,
+                        type: event.target.parentNode.previousElementSibling.innerHTML.toLowerCase()
                     }
                 );
                 alertText.innerHTML = arr[i].innerHTML;

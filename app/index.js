@@ -36,6 +36,7 @@ app.use(express.static(__dirname + "/public"));
 /* #region database connection */
 const {
     ObjectId,
+    NumberInt,
     userCollection,
     tvOwnlist,
     movieOwnlist,
@@ -303,7 +304,25 @@ app.post('/addMovie', async (req, res) => {
 });
 
 app.post('/editItem', async (req, res) => {
-    console.log(req.body);
+    if (req.body.data.type === "tv") {
+        await tvOwnlist.updateOne(
+            { 
+                _id: new ObjectId(req.session.tvOwnlist), 
+                "data.id": new NumberInt(req.body.data.id) 
+            },
+            { 
+                $set: { 
+                    "data.$.status": req.body.data.newStatus 
+                } 
+            }
+        );
+        return;
+    } else if (req.body.data.type === "movie") {
+        console.log("thats a movie fam ...");
+        return;
+    }
+
+    console.log("wtf is that");
  });
 
 app.get('*', (req, res) => {
