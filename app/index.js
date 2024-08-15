@@ -9,7 +9,7 @@ const Joi = require("joi");
 const {
     compareTitle,
     compareStatus
-} = require("./scripts/indexFunctions");
+} = require("./scripts/indexFunctions.js");
 /* #endregion imports */
 
 /* #region variables */
@@ -41,9 +41,7 @@ const {
     tvOwnlist,
     movieOwnlist,
     mongoSessions
-} = require('./scripts/databaseConnection');
-const { format } = require("path");
-const { stat } = require("fs");
+} = require('./scripts/databaseConnection.js');
 
 app.use(
     session({
