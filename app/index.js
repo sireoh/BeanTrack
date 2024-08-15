@@ -1,5 +1,5 @@
 /* #region imports */
-require("./scripts/utils");
+require("./utils.js");
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
@@ -41,7 +41,7 @@ const {
     tvOwnlist,
     movieOwnlist,
     mongoSessions
-} = require(__dirname + '/scripts/databaseConnection');
+} = require('./scripts/databaseConnection');
 const { format } = require("path");
 const { stat } = require("fs");
 
