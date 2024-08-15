@@ -1,6 +1,6 @@
 <!-- add new -->
 <div class="d-flex justify-content-end">
-    <a class="btn btn-outline-secondary" id="VLTLkGETmEqX7tjiClvJjw">➕ Add Show</a>
+    <a class="btn btn-outline-secondary" id="VLTLkGETmEqX7tjiClvJjw">➕ Add</a>
 </div>
 
 <!-- filters -->
@@ -21,7 +21,11 @@
         <a href="/movielist/<%= username %>?status=planned" class="btn btn-outline-secondary text-decoration-none text-dark">Plan to Watch</a>
     <% } %>
 </div>
-<form action="/searchOwnlist" method="post">
+<% if (isTV) { %>
+    <form action="/searchOwnlist/tvlist" method="post">
+<% } else { %>
+    <form action="/searchOwnlist/movielist" method="post">
+<% } %>
     <div class="input-group">
         <input type="search" class="form-control rounded" placeholder="Search" name="search" value="<%= search %>" />
         <button type="submit" class="btn btn-outline-primary" data-mdb-ripple-init>🔍</button>

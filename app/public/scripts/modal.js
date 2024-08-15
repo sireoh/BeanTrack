@@ -184,7 +184,7 @@ async function createMovieTable(search, data) {
             <option value="current">Currently Watching</option>
           </select>
         </td>
-        <td class="col-md-1"><button class="btn btn-primary" onclick="AddTV(event, ${i})">Add</button></td>`;
+        <td class="col-md-1"><button class="btn btn-primary" onclick="AddMovie(event, ${i})">Add</button></td>`;
       } else {
         str += `
         <td class="col-md-3"></td>
@@ -213,7 +213,7 @@ async function createMovieTable(search, data) {
 
 function AddTV(event, i) {
   event.target.classList = "btn btn-secondary";
-  event.target.disabled = "true";
+  event.target.disabled = true;
   event.target.parentNode.previousElementSibling.children[0].disabled = true;
 
   localData[i].status = getStatus(i);
@@ -225,8 +225,6 @@ async function AddMovie(event, i) {
   event.target.disabled = true;
   event.target.parentNode.previousElementSibling.children[0].disabled = true;
 
-  localData[i].status = getStatus(i);
-
   try {
     const rating = await getMovieRating(localData[i].imdb);
     console.log(rating);
@@ -235,6 +233,7 @@ async function AddMovie(event, i) {
     console.error("Error fetching movie rating:", error);
   }
 
+  localData[i].status = getStatus(i);
   postMovieData(localData[i]);
 }
 

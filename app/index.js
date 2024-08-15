@@ -196,9 +196,9 @@ app.get('/logOut', (req, res) => {
 });
 /* #endregion login */
 
-app.post('/searchOwnlist', (req, res) => {
+app.post('/searchOwnlist/:id', (req, res) => {
     const search = req.body.search;
-    res.redirect(`/tvlist/${req.session.username}?search=${search}`);
+    res.redirect(`/${req.params.id}/${req.session.username}?search=${search}`);
 });
 
 app.get('/tvlist/?:id', sessionValidation, async (req, res) => {
@@ -363,12 +363,10 @@ app.post('/addShow', async (req, res) => {
 });
 
 app.post('/addMovie', async (req, res) => {
-   console.log(req.body);
-
    await movieOwnlist.updateOne(
-    { _id: new ObjectId(req.session.movieOwnlist) },
-    { $push: { data: req.body.data } }
-);
+        { _id: new ObjectId(req.session.movieOwnlist) },
+        { $push: { data: req.body.data } }
+    );
 });
 
 app.post('/editItem', async (req, res) => {
