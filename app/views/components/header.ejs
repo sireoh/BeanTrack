@@ -15,10 +15,11 @@
 </head>
 <body>
     <div class="container">
-        <%- include("navbar", {
-            username: username,
-            authenticated: authenticated
-        }) %>
+        <% if (typeof username != "undefined") { %>
+            <%- include("navbar", { username: username, authenticated: authenticated }) %>
+        <% } else { %>
+            <%- include("navbar", {}) %>
+        <% } %>
         <%- include("alertModal") %>
         <%- include("modal") %>
         <!-- stuff go here -->

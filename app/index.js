@@ -93,18 +93,13 @@ app.get('/', async (req, res) => {
 
 /* #region signup */
 app.get('/signup', (req, res) => {
-    const err = req.query.err ? error_message : "";
-
-    res.render("signup", {
-        username: null,
-        authenticated: req.session.authenticated,
-        errors: err
-    });
+    res.render("signup", {});
 });
 
 app.post('/signupSubmit', async (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
+    var errors = [];
 
     const schema = Joi.object({
         username: Joi.string().alphanum().max(20).required(),
@@ -112,36 +107,54 @@ app.post('/signupSubmit', async (req, res) => {
     });
 
     const validationResult = schema.validate({username, password});
+
 	if (validationResult.error != null) {
-       error_message = validationResult.error;
-	   res.redirect(`/signup?err=1`);
-	   return;
-   }
+        errors.push(validationResult.error.details[0].message);
+    }
 
-    var hashedPassword = await bcrypt.hashSync(password, parseInt(SALTROUNDS));
+    if (await userCollection.findOne({ username: username })) {
+        errors.push(`${username} is already in use!`);
+    } else if (errors.length === 0) {
+        var hashedPassword = await bcrypt.hashSync(password, parseInt(SALTROUNDS));
 
-    await userCollection.insertOne({
-        username: username,
-        password: hashedPassword,
+        const newTVList = new ObjectId();
+        const newMovieList = new ObjectId();
+
+        await userCollection.insertOne({
+            username: username,
+            password: hashedPassword,
+            tvlist: newTVList,
+            movielist: newMovieList,
+        });
+
+        await tvOwnlist.insertOne({
+            _id: newTVList,
+            data: []
+        });
+
+        await movieOwnlist.insertOne({
+            _id: newMovieList,
+            data: []
+        });
+
+        req.session.authenticated = true;
+        req.session.username = username;
+        req.session.cookie.maxAge = expireTime;
+
+        res.redirect("/");
+        return;
+    }
+
+    res.render("signup", {
+        errors: errors,
     });
-
-    req.session.authenticated = true;
-    req.session.username = username;
-    req.session.cookie.maxAge = expireTime;
-
-    res.redirect("/");
+    return;
 });
 /* #endregion signup */
 
 /* #region login */
 app.get('/login', (req, res) => {
-    const err = req.query.err ? error_message : "";
-
-    res.render("login", {
-        username: null,
-        authenticated: req.session.authenticated,
-        errors: err
-    });
+    res.render("login", {});
 });
 
 app.post('/loggingIn', async (req, res) => {
@@ -167,7 +180,7 @@ app.post('/loggingIn', async (req, res) => {
 
     if (data.length != 1) {
         error_message = "user not found.";
-        res.redirect("login?err=1");
+        res.redirect("/login?err=1");
         return;
     }
 
@@ -182,7 +195,7 @@ app.post('/loggingIn', async (req, res) => {
         return;
     } else {
         error_message = "user not found.";
-        res.redirect("login?err=1");
+        res.redirect("/login?err=1");
         return;
     }
 });
