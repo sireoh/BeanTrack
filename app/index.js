@@ -180,7 +180,7 @@ app.post('/loggingIn', async (req, res) => {
         req.session.movieOwnlist = data[0].movielist;
         req.session.cookie.maxAge = expireTime;
 
-        res.redirect("/")
+        res.redirect(`/tvlist/${req.session.username}`)
         return;
     } else {
         error_message = "user not found.";

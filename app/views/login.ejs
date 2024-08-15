@@ -1,5 +1,5 @@
 <%- include('components/header') %>
-<form action="/loggingIn" method="post">
+<form action="/loggingIn" method="post" autocomplete="off">
     <% if (typeof errors !== 'undefined' && errors !== null) { %>
         <span class="text-danger"><%= errors %></span>
       <% } %>
