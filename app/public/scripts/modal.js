@@ -149,7 +149,7 @@ async function createMovieTable(search, data) {
   }
   console.log(local_movieownlist);
 
-  if (!data) {
+  if (data === "undefined" || data === null) {
     resultPreview.innerHTML = `
     <div class="text-center mt-3">It's kinda quiet here ... 🦗</div>`;
     return;
@@ -278,7 +278,7 @@ async function searchFn(event) {
     await fetch(`https://api.tvmaze.com/search/shows?q=${search}`)
     .then((res) => res.json())
     .then((data) => { createTVTable(search, data) });
-  } else {
+  } else if (currentType === "Movie") {
     const url = `http://www.omdbapi.com/?s=${search}&apikey=${OMDB_KEY}`;
     await fetch(url)
     .then((res) => res.json())
@@ -290,6 +290,8 @@ async function searchFn(event) {
         return;
       }
     })
+  } else {
+    console.log("No type found.");
   }
 }
 
