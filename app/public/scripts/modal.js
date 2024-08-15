@@ -22,7 +22,38 @@ function initModalEvents() {
   });
 }
 
-function createTVTable(data) {
+async function checkOwnListData() {
+  const currentURL = window.location.href;
+  let id = null;
+
+  if (!currentURL.includes("/tvlist/")) {
+    return;
+  } else {
+    id = currentURL.split("/tvlist/")[1].split("?")[0];
+  }
+
+  const url = `http://localhost:3000/ownlist/${id}?type=tv`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error);
+    return null;
+  }
+}
+
+async function createTVTable(data) {
+  let local_tvownlist;
+
+  try {
+    const temp = await checkOwnListData();
+    local_tvownlist = temp;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+  console.log(local_tvownlist);
+
   if (data.length < 1) {
     resultPreview.innerHTML = `
     <div class="text-center mt-3">It's kinda quiet here ... 🦗</div>`;
@@ -32,6 +63,7 @@ function createTVTable(data) {
   let str = "";
   localData = [];
   for (let i = 0; i < data.length; i++) {
+    let found = false;
     const img = data[i].show.image ? data[i].show.image.medium : "";
 
     try {
@@ -42,15 +74,29 @@ function createTVTable(data) {
       str += `
           <td class="col-md-1"><img src="${img}" alt="${data[i].show.id}" height="128px" width="auto"/></td>
           <td class="me-auto fw-bold text-decoration-none fs-5"><a href="https://www.imdb.com/title/${data[i].show.externals.imdb}/" target="_blank">${data[i].show.name}</a></td>
-          <td class=""><div>${data[i].show.rating.average}</div></td>
-          <td class="col-md-3">
-            <select class="form-select" id="CF5fHFw7ekmcDo58yqh27A${i}">
-              <option value="completed" selected>Completed</option>
-              <option value="planned">Plan to Watch</option>
-              <option value="current">Currently Watching</option>
-            </select>
-          </td>
-          <td class="col-md-1"><button class="btn btn-primary" onclick="Add(event, ${i})">Add</button></td>`;
+          <td class=""><div>${data[i].show.rating.average}</div></td>`;
+
+      for (let j = 0; j < local_tvownlist.length; j++) {
+        if (local_tvownlist[j].imdb == data[i].show.externals.imdb) {
+          found = true;
+        }
+      }
+
+      if (!found) {
+        str += `
+        <td class="col-md-3">
+          <select class="form-select" id="CF5fHFw7ekmcDo58yqh27A${i}">
+            <option value="completed" selected>Completed</option>
+            <option value="planned">Plan to Watch</option>
+            <option value="current">Currently Watching</option>
+          </select>
+        </td>
+        <td class="col-md-1"><button class="btn btn-primary" onclick="AddTV(event, ${i})">Add</button></td>`;
+      } else {
+        str += `
+        <td class="col-md-3"></td>
+        <td class="col-md-1"><button class="btn btn-secondary" disabled>Added</button></td>`;
+      }
 
       str += `
         </tr>
@@ -103,6 +149,7 @@ function createMovieTable(data) {
         "image" : data[i].Poster,
         "title" : data[i].Title,
         "imdb" : data[i].imdbID,
+        "score": "",
         "type" : currentType
       });
       resultPreview.innerHTML = str;
@@ -112,7 +159,7 @@ function createMovieTable(data) {
   }
 }
 
-function Add(event, i) {
+function AddTV(event, i) {
   event.target.classList = "btn btn-secondary";
   event.target.disabled = "true";
   event.target.parentNode.previousElementSibling.children[0].disabled = true;
@@ -121,12 +168,21 @@ function Add(event, i) {
   postData(localData[i]);
 }
 
-function AddMovie(event, i) {
+async function AddMovie(event, i) {
   event.target.classList = "btn btn-secondary";
-  event.target.disabled = "true";
+  event.target.disabled = true;
   event.target.parentNode.previousElementSibling.children[0].disabled = true;
 
   localData[i].status = getStatus(i);
+
+  try {
+    const rating = await getMovieRating(localData[i].imdb);
+    console.log(rating);
+    localData[i].score = rating;
+  } catch (error) {
+    console.error("Error fetching movie rating:", error);
+  }
+
   postMovieData(localData[i]);
 }
 
@@ -172,9 +228,8 @@ async function searchFn(event) {
     .then((res) => res.json())
     .then((data) => { createTVTable(data) });
   } else {
-    const test = "https://www.omdbapi.com/?s=horse&apikey=b05a38fc";
-    const main = `http://www.omdbapi.com/?s=${search}&apikey=${OMDB_KEY}`;
-    await fetch(main)
+    const url = `http://www.omdbapi.com/?s=${search}&apikey=${OMDB_KEY}`;
+    await fetch(url)
     .then((res) => res.json())
     .then((data) => { createMovieTable(data.Search) })
     .catch((error) => {
@@ -184,6 +239,18 @@ async function searchFn(event) {
         return;
       }
     })
+  }
+}
+
+async function getMovieRating(imdb) {
+  const url = `http://www.omdbapi.com/?i=${imdb}&apikey=${OMDB_KEY}`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    return data.imdbRating;
+  } catch (error) {
+    console.error("Error fetching from OMDB API:", error);
+    return null;
   }
 }
 

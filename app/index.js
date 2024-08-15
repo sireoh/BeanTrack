@@ -252,13 +252,50 @@ app.get('/tvlist/?:id', sessionValidation, async (req, res) => {
     });
 });
 
+app.get('/ownlist/?:id', sessionValidation, async (req, res) => {
+    const id = req.params.id;
+    const type = req.query.type;
+    
+    if (!type) {
+        res.send({error: `No "Type" param provided.`});
+        return;
+    }
+
+    if (type === "tv") {
+        const getTVObjID = await userCollection
+        .find({ username: id })
+        .project({ tvlist: 1})
+        .toArray();
+
+        if (getTVObjID.length === 0) {
+            return;
+        } else {
+            req.session.tvOwnlist = getTVObjID[0].tvlist;
+        }
+
+        const result = await tvOwnlist
+            .find({ _id: req.session.tvOwnlist })
+            .project({ data: 1})
+            .toArray();
+
+        res.send(result[0].data);
+        return;
+
+    } else if (type === "movie") {
+        res.send({message: "Movie data goes here ..."});
+        return;
+    }
+
+    res.send({error: "Incorrect type."});
+});
+
 app.post('/addShow', async (req, res) => {
+    console.log(req.body);
+
     await tvOwnlist.updateOne(
         { _id: new ObjectId(req.session.tvOwnlist) },
         { $push: { data: req.body.data } }
     );
-
-    console.log(`Added ${req.body.data.title} to the list, marked as ${req.body.data.status}`);
 });
 
 app.post('/addMovie', async (req, res) => {

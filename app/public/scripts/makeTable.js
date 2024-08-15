@@ -1,6 +1,13 @@
 const editButtons = document.getElementsByClassName("rHdkJvYyW0u1OTH9XOi7nQ");
 const addShowButton = document.getElementById("VLTLkGETmEqX7tjiClvJjw");
 const alertText = document.getElementById("RldW9jTkvEKJ9t7ohj2pUw");
+const status_colors = {
+	"current" : "#23b230",
+	"completed" : "#26448f",
+	"onhold" : "#f1c83e",
+	"dropped" : "#a12f31",
+	"planned" : "#c3c3c3"
+}
 
 function editItem(event) {
     const id = event.target.parentNode.parentNode.children[2].children[0].alt;
@@ -12,6 +19,7 @@ function editItem(event) {
         for (let i = 0; i < arr.length; i++) {
             if (arr[i].selected === true) {
                 setYesButton(
+                    event.target,
                     document.getElementById("ZFreIdeaoUydMMbVK4q5fg"),
                     {
                         id: id,
@@ -25,7 +33,10 @@ function editItem(event) {
     });
 }
 
-function setYesButton(node, data) {
+function setYesButton(selectform, node, data) {
+    const statusBG = selectform.parentNode.parentNode.children[0];
+    const entireDiv = selectform.parentNode.parentNode;
+
     node.addEventListener("click", () => {
         fetch('http://localhost:3000/editItem', {  
             method: 'post',
@@ -36,6 +47,14 @@ function setYesButton(node, data) {
           .catch((error) => { console.log(`Error: `, error) })
         alertModal.classList.toggle("d-none");
         node.outerHTML = `<button class="btn btn-success" id="ZFreIdeaoUydMMbVK4q5fg">Yes</button>`;
+
+        if (data.newStatus === "delete") {
+            entireDiv.outerHTML = "";
+            return;
+        }
+
+        statusBG.style.backgroundColor = status_colors[ data.newStatus ];
+        selectform.disabled = true;
     });
 }
 
@@ -62,7 +81,7 @@ function setup() {
     }
 
     addShowButton.addEventListener("click", () => {
-        modal.classList.toggle("d-none");
+        mainModal.classList.toggle("d-none");
     });
 }
 
