@@ -5,12 +5,21 @@
 
 <!-- filters -->
 <div class="btn-group w-100 m-0 p-0">
-    <a href="/tvlist/<%= username %>" class="btn btn-outline-secondary text-decoration-none text-dark">All TV/Movies</a>
-    <a href="/tvlist/<%= username %>?status=current" class="btn btn-outline-secondary text-decoration-none text-dark">Currently Watching</a>
-    <a href="/tvlist/<%= username %>?status=completed" class="btn btn-outline-secondary text-decoration-none text-dark">Completed</a>
-    <a href="/tvlist/<%= username %>?status=onhold" class="btn btn-outline-secondary text-decoration-none text-dark">On Hold</a>
-    <a href="/tvlist/<%= username %>?status=dropped" class="btn btn-outline-secondary text-decoration-none text-dark">Dropped</a>
-    <a href="/tvlist/<%= username %>?status=planned" class="btn btn-outline-secondary text-decoration-none text-dark">Plan to Watch</a>
+    <% if (isTV) { %>
+        <a href="/tvlist/<%= username %>" class="btn btn-outline-secondary text-decoration-none text-dark">All TV</a>
+        <a href="/tvlist/<%= username %>?status=current" class="btn btn-outline-secondary text-decoration-none text-dark">Currently Watching</a>
+        <a href="/tvlist/<%= username %>?status=completed" class="btn btn-outline-secondary text-decoration-none text-dark">Completed</a>
+        <a href="/tvlist/<%= username %>?status=onhold" class="btn btn-outline-secondary text-decoration-none text-dark">On Hold</a>
+        <a href="/tvlist/<%= username %>?status=dropped" class="btn btn-outline-secondary text-decoration-none text-dark">Dropped</a>
+        <a href="/tvlist/<%= username %>?status=planned" class="btn btn-outline-secondary text-decoration-none text-dark">Plan to Watch</a>
+    <% } else { %>
+        <a href="/movielist/<%= username %>" class="btn btn-outline-secondary text-decoration-none text-dark">All Movies</a>
+        <a href="/movielist/<%= username %>?status=current" class="btn btn-outline-secondary text-decoration-none text-dark">Currently Watching</a>
+        <a href="/movielist/<%= username %>?status=completed" class="btn btn-outline-secondary text-decoration-none text-dark">Completed</a>
+        <a href="/movielist/<%= username %>?status=onhold" class="btn btn-outline-secondary text-decoration-none text-dark">On Hold</a>
+        <a href="/movielist/<%= username %>?status=dropped" class="btn btn-outline-secondary text-decoration-none text-dark">Dropped</a>
+        <a href="/movielist/<%= username %>?status=planned" class="btn btn-outline-secondary text-decoration-none text-dark">Plan to Watch</a>
+    <% } %>
 </div>
 <form action="/searchOwnlist" method="post">
     <div class="input-group">
@@ -21,7 +30,7 @@
 <table class="text-center w-100">
     <% if (data.length !== 0) { %>
         <tr class="border-bottom">
-            <th></th>
+            <th class=""></th>
             <th class="ps-2 pe-2">#</th>
             <th class="ps-2 pe-2 col-md-1">Image</th>
             <th class="ps-2 pe-2">Title</th>

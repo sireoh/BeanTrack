@@ -23,4 +23,4 @@ function compareStatus(a, b) {
 module.exports = { 
     compareTitle,
     compareStatus
- };
+};

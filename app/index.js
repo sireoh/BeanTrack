@@ -164,7 +164,7 @@ app.post('/loggingIn', async (req, res) => {
 
     const data = await userCollection
         .find({username: username})
-        .project({username: 1, password: 1, user_data: 1})
+        .project({ username: 1, password: 1, tvlist: 1, movielist: 1 })
         .toArray();
 
     if (data.length != 1) {
@@ -176,7 +176,8 @@ app.post('/loggingIn', async (req, res) => {
     if (await bcrypt.compare(password, data[0].password)) {
         req.session.authenticated = true;
         req.session.username = data[0].username;
-        req.session.userData = data[0].user_data;
+        req.session.tvOwnlist = data[0].tvlist;
+        req.session.movieOwnlist = data[0].movielist;
         req.session.cookie.maxAge = expireTime;
 
         res.redirect("/")
@@ -205,20 +206,20 @@ app.get('/tvlist/?:id', sessionValidation, async (req, res) => {
     const search = req.query.search ? req.query.search : "";
     let filtered_data = req.session.userData ? req.session.userData : [];
 
-    const getTVObjID = await userCollection
+    const getOwnlists = await userCollection
         .find({ username: id })
-        .project({ tvlist: 1})
+        .project({ tvlist: 1 })
         .toArray();
 
-    if (getTVObjID.length === 0) {
+    if (getOwnlists.length === 0) {
         return;
     } else {
-        req.session.tvOwnlist = getTVObjID[0].tvlist;
+        req.session.tvOwnlist = getOwnlists[0].tvlist;
     }
 
     const result = await tvOwnlist
         .find({ _id: req.session.tvOwnlist })
-        .project({ data: 1})
+        .project({ data: 1 })
         .toArray();
 
     filtered_data = result[0].data;
@@ -249,6 +250,61 @@ app.get('/tvlist/?:id', sessionValidation, async (req, res) => {
         authenticated: req.session.authenticated,
         status_colors: status_colors,
         data: dataByStatus,
+        isTV: true,
+        search: search
+    });
+});
+
+app.get('/movielist/?:id', sessionValidation, async (req, res) => {
+    const id = req.params.id;
+    const search = req.query.search ? req.query.search : "";
+    let filtered_data = req.session.userData ? req.session.userData : [];
+
+    const getOwnlists = await userCollection
+        .find({ username: id })
+        .project({ movielist: 1 })
+        .toArray();
+
+    if (getOwnlists.length === 0) {
+        return;
+    } else {
+        req.session.movieOwnlist = getOwnlists[0].movielist;
+    }
+
+    const result = await movieOwnlist
+        .find({ _id: req.session.movieOwnlist })
+        .project({ data: 1 })
+        .toArray();
+
+    filtered_data = result[0].data;
+    req.session.userData = filtered_data;
+
+    if (req.query.status) {
+        filtered_data = req.session.userData.filter((item) => {
+            return item.status === req.query.status;
+        });
+    }
+
+    if (search !== "") {
+        filtered_data = req.session.userData.filter((item) => {
+            // TODO: diacritics dont work ...
+            if (item.title.toLowerCase().normalize("NFD") === search) {
+                return true;
+            }
+
+            return item.title.toLowerCase().startsWith(search);
+        });
+    }
+
+    const alphabeticalData = filtered_data.sort( compareTitle );
+    const dataByStatus = alphabeticalData.sort( compareStatus );
+
+    res.render("movielist", {
+        username: req.session.username,
+        authenticated: req.session.authenticated,
+        status_colors: status_colors,
+        data: dataByStatus,
+        isTV: false,
         search: search
     });
 });
@@ -301,9 +357,32 @@ app.post('/addShow', async (req, res) => {
 
 app.post('/addMovie', async (req, res) => {
    console.log(req.body);
+
+   await movieOwnlist.updateOne(
+    { _id: new ObjectId(req.session.movieOwnlist) },
+    { $push: { data: req.body.data } }
+);
 });
 
 app.post('/editItem', async (req, res) => {
+    console.log(req.body.data.type);
+
+    if (req.body.data.newStatus === "delete") {
+        console.log(req.body.data.id);
+        if (req.body.data.type === "tv") {
+            await tvOwnlist.updateOne(
+                { _id: new ObjectId(req.session.tvOwnlist) },
+                { $pull: { "data": { id: new NumberInt(req.body.data.id) } } }
+            );
+        } else if (req.body.data.type === "movie") {
+            await movieOwnlist.updateOne(
+                { _id: new ObjectId(req.session.movieOwnlist) },
+                { $pull: { "data": { id: req.body.data.id } } }
+            );
+        }
+        return;
+    }
+
     if (req.body.data.type === "tv") {
         await tvOwnlist.updateOne(
             { 
@@ -318,7 +397,17 @@ app.post('/editItem', async (req, res) => {
         );
         return;
     } else if (req.body.data.type === "movie") {
-        console.log("thats a movie fam ...");
+        await movieOwnlist.updateOne(
+            { 
+                _id: new ObjectId(req.session.movieOwnlist), 
+                "data.id": req.body.data.id
+            },
+            { 
+                $set: { 
+                    "data.$.status": req.body.data.newStatus 
+                } 
+            }
+        );
         return;
     }
 
