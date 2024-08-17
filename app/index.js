@@ -320,7 +320,7 @@ app.get('/movielist/?:id', sessionValidation, async (req, res) => {
     });
 });
 
-app.get('/ownlist/?:id', sessionValidation, async (req, res) => {
+app.get('/ownlist/?:id', async (req, res) => {
     const id = req.params.id;
     const type = req.query.type;
     
