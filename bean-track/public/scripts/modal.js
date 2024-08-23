@@ -279,7 +279,7 @@ async function searchFn(event) {
     .then((res) => res.json())
     .then((data) => { createTVTable(search, data) });
   } else if (currentType === "Movie") {
-    const url = `http://www.omdbapi.com/?s=${search}&apikey=${OMDB_KEY}`;
+    const url = `https://www.omdbapi.com/?s=${search}&apikey=${OMDB_KEY}`;
     await fetch(url)
     .then((res) => res.json())
     .then((data) => { createMovieTable(search, data.Search) })

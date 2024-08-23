@@ -1,0 +1,42 @@
+<%- include('components/header', { 
+    authenticated : authenticated,
+    username : username
+ }) %>
+<form action="/searchShow" method="post">
+    <div class="input-group">
+        <input type="search" class="form-control rounded" placeholder="Search" name="search" value="<%= search %>" />
+        <button type="submit" class="btn btn-outline-primary" data-mdb-ripple-init>🔍</button>
+    </div>
+</form>
+
+<% if (data && typeof data !== "undefined" && data.length > 0) { %>
+    <table class="w-100">
+        <tr>
+            <th class="col-md-1">Image</th>
+            <th class="col-md-2">Title</th>
+            <th class="col-md-auto">Summary</th>
+            <th>Score</th>
+            <th></th>
+        </tr>
+        <% for (let i = 0; i < data.length; i++) { %>
+            <tr>
+                <td><img src="<%= data[i].image %>" height="128px" /></td>
+                <td>
+                    <a href="https://www.imdb.com/title/<%= data[i].imdb %>/" class="text-decoration-none fw-bold"><%= data[i].title %></a>
+                </td>
+                <td><%- data[i].summary %></td>
+                <td class="text-center"><%= data[i].score %></td>
+                <td class="btn-group mt-4">
+                    <a href="/addShow?id=<%= data[i].id %>&status=completed" class="btn btn-outline-primary">✅ Completed</a>
+                    <a href="/addShow?id=<%= data[i].id %>&status=current" class="btn btn-outline-primary">🌊 Current</a>
+                    <a href="/addShow?id=<%= data[i].id %>&status=planned" class="btn btn-outline-secondary">🪴 Planned</a>
+                </td>
+            </tr>
+        <% } %>
+    </table>
+<% } else { %>
+    <div class="text-center">It's awfully quiet here ... 🦗</div>
+<% } %>
+
+
+<%- include('components/footer') %>

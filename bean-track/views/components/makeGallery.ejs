@@ -1,0 +1,26 @@
+<div class="btn-group w-100 m-0 p-0">
+    <a href="/tvlist" class="btn btn-outline-secondary text-decoration-none text-dark">All</a>
+    <a href="/tvlist?status=current" class="btn btn-outline-secondary text-decoration-none text-dark">Currently Watching</a>
+    <a href="/tvlist?status=completed" class="btn btn-outline-secondary text-decoration-none text-dark">Completed</a>
+    <a href="/tvlist?status=onhold" class="btn btn-outline-secondary text-decoration-none text-dark">On Hold</a>
+    <a href="/tvlist?status=dropped" class="btn btn-outline-secondary text-decoration-none text-dark">Dropped</a>
+    <a href="/tvlist?status=planned" class="btn btn-outline-secondary text-decoration-none text-dark">Plan to Watch</a>
+</div>
+
+<table class="w-100">
+    <% for (let i = 0; i < data.length; i++) { %>
+        <tr class="">
+            <td><img src="<%= data[i].image %>" height="128px" /></td>
+            <td>
+                <a href="https://www.imdb.com/title/<%= data[i].imdb %>/" class="text-decoration-none fw-bold"><%= data[i].title %></a>
+            </td>
+            <td><%- data[i].summary %></td>
+            <td class="text-center"><%= data[i].score %></td>
+            <td class="btn-group mt-4">
+                <a href="/addShow?id=<%= data[i].id %>&status=completed" class="btn btn-outline-primary">✅ Completed</a>
+                <a href="/addShow?id=<%= data[i].id %>&status=current" class="btn btn-outline-primary">🌊 Current</a>
+                <a href="/addShow?id=<%= data[i].id %>&status=planned" class="btn btn-outline-secondary">🪴 Planned</a>
+            </td>
+        </tr>
+    <% } %>
+</table>
