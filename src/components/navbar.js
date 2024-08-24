@@ -9,8 +9,8 @@ const Navbar = () => {
     content = (
         <>
             <p className="m-auto p-3 rounded-none cursor-default">Hello <span className="font-bold">{username}</span>!</p>
-            <li><a href={"/tvlist/"} className="btn btn-primary rounded-none">TV List</a></li>
-            <li><a href={"/movielist/"} className="btn btn-primary rounded-none">Movie List</a></li>
+            <li><a href={"/tvlist"} className="btn btn-primary rounded-none">TV List</a></li>
+            <li><a href={"/movielist"} className="btn btn-primary rounded-none">Movie List</a></li>
             <li><a href="/logout" className="btn btn-error rounded-none">Logout</a></li>
         </>
     );

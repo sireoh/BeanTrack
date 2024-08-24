@@ -18,37 +18,69 @@ const AddModalSearchBar = () => {
   }
 
   function outputTV(data) {
+    if (data.Error) {
+      console.log(data.Error);
+      return (
+        <>
+          <div className='text-center'>{data.Error} ... 🦗</div>
+        </>
+      );
+    }
+
     return (
         <>
-            {data.map((item, index) => (
-                <table key={index}>
-                    <tbody>
-                        <tr>
-                            <td><img src={(item.show.image !== "undefined") ? item.show.image.medium : ""} alt={item.show.id} height="128px" width="auto" /></td>
-                            <td><a href={`https://www.imdb.com/title/${item.show.externals.imdb}/`} target="_blank" rel="noopener noreferrer">{item.show.name}</a></td>
-                            <td><p>{item.show.rating.average}</p></td>
-                        </tr>
-                    </tbody>
-                </table>
-            ))}
+          <table className='table-fixed w-full'>
+            <thead>
+              <tr>
+                <th className='w-1/12'>Image</th>
+                <th className='text-left ps-3'>Name</th>
+                <th className='w-min'>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((item, index) => (
+              <tr key={index}>
+                <td><img src={item.show.image ? item.show.image.medium : ""} alt={item.show.id} height="128px" width="180px" /></td>
+                <td className='ps-3 text-xl font-bold'><a href={`https://www.imdb.com/title/${item.show.externals.imdb}/`} target="_blank" rel="noopener noreferrer">{item.show.name}</a></td>
+                <td className='text-center'><p>{(item.show.rating.average) ? item.show.rating.average : "-"}</p></td>
+              </tr>
+              ))}
+            </tbody>
+          </table>
         </>
     );
   }
 
   function outputMovie(data) {
-    console.log(data);
+    if (data.Error) {
+      console.log(data.Error);
+      return (
+        <>
+          <div className='text-center'>{data.Error} ... 🦗</div>
+        </>
+      );
+    }
+
     return (
         <>
-            {data.map((item, index) => (
-                <table key={index}>
-                    <tbody>
-                        <tr>
-                            <td><img src={item.Poster} alt={item.imdbID.substring(2)} height="128px" width="auto" /></td>
-                            <td><a href={`https://www.imdb.com/title/${item.imdbID}/`} target="_blank">{item.Title}</a></td>
-                        </tr>
-                    </tbody>
-                </table>
-            ))}
+          <table className='table-fixed w-full'>
+            <thead>
+              <tr>
+                <th className='w-1/12'>Image</th>
+                <th className='text-left ps-3'>Name</th>
+                <th className='w-min'>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((item, index) => (
+              <tr key={index}>
+                <td><img src={item.Poster} alt={item.imdbID.substring(2)} height="128px" width="180px" /></td>
+                <td className='ps-3 text-xl font-bold'><a href={`https://www.imdb.com/title/${item.imdbID}/`} target="_blank" rel="noopener noreferrer">{item.Title}</a></td>
+                <td className='text-center'>-</td>
+              </tr>
+              ))}
+            </tbody>
+          </table>
         </>
     );
   }
@@ -63,12 +95,24 @@ const AddModalSearchBar = () => {
     if (currentType == 0) {
         await fetch(`https://api.tvmaze.com/search/shows?q=${search}`)
         .then((res) => res.json())
-        .then((data) => { handleOutputContent(search, 0, data) });
+        .then((data) => { 
+          if (data.length >= 1) {
+            handleOutputContent(search, 0, data);
+          } else {
+            handleOutputContent(search, 0, data={Error: "TV Show not found!"});
+          }
+         });
       } else if (currentType == 1) {
         const url = `https://www.omdbapi.com/?s=${search}&apikey=${OMDB_KEY}`;
         await fetch(url)
         .then((res) => res.json())
-        .then((data) => { handleOutputContent(search, 1, data.Search) })
+        .then((data) => { 
+          if (data.Response == "True") {
+            handleOutputContent(search, 1, data.Search)
+          } else {
+            handleOutputContent(search, 1, data)
+          }
+         })
         .catch((error) => {
           if (error) {
             console.log("error");
