@@ -10,6 +10,28 @@ const statusColors = {
 	"planned" : "#c3c3c3"
 }
 
+function compareTitle(a, b) {
+  if ( a.title < b.title ){
+      return -1;
+    }
+    if ( a.title > b.title ){
+      return 1;
+    }
+    return 0;
+}
+
+function compareStatus(a, b) {
+  const statusOrder = {
+      current: 1,
+      completed: 2,
+      onhold: 3,
+      dropped: 4,
+      planned: 5
+  }
+
+  return statusOrder[a.status] - statusOrder[b.status];
+}
+
 const MakeTable = ({ type }) => {
   const [outputContent, setOutputContent] = useState(null);
 
@@ -23,8 +45,9 @@ const MakeTable = ({ type }) => {
         }
 
         const data = await response.json();
-        console.log(data);
-        setOutputContent(buildTable(data));
+        const alphabeticalData = data.sort( compareTitle );
+        const dataByStatus = alphabeticalData.sort( compareStatus );
+        setOutputContent(buildTable(dataByStatus));
       } catch (error) {
         console.error("Error fetching data:", error);
       }
