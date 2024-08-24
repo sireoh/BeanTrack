@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import AddButton from './addbutton';
+import EditButton from './editbutton';
+
+const statusColors = {
+	"current" : "#23b230",
+	"completed" : "#26448f",
+	"onhold" : "#f1c83e",
+	"dropped" : "#a12f31",
+	"planned" : "#c3c3c3"
+}
 
 const MakeTable = ({ type }) => {
   const [outputContent, setOutputContent] = useState(null);
@@ -25,21 +34,36 @@ const MakeTable = ({ type }) => {
   }, []);
 
   function buildTable(data) {
-      return (
-         <>
-            {data.map((item, index) => (
-               <table key={index}>
-                     <tbody>
-                        <tr>
-                           <td><img src={item.image} alt={item.id} height="128px" width="auto" /></td>
-                           <td><a href={`https://www.imdb.com/title/${item.imdb}/`} target="_blank" rel="noopener noreferrer">{item.title}</a></td>
-                           <td><p>{item.score}</p></td>
-                        </tr>
-                     </tbody>
-               </table>
-            ))}
-         </>
-   );
+    return (
+        <>
+          <table className='table-fixed w-full'>
+            <thead>
+              <tr className='border-b-2 border-gray-800'>
+                <th className='w-min pe-2'></th>
+                <th className='w-min ps-5 pe-5'>#</th>
+                <th className='w-1/12'>Image</th>
+                <th className='text-left ps-3'>Name</th>
+                <th className='w-min'>Score</th>
+                <th className='w-2/12'></th>
+                <th className='w-1/12'></th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((item, index) => (
+                <tr key={index} className='hover:bg-gray-600 border-b-2 border-gray-800'>
+                  <td style={{backgroundColor: statusColors[item.status]}}></td>
+                  <td className='text-center'>{index+1}</td>
+                  <td><img src={item.image} alt={item.id} height="128px" width="180" /></td>
+                  <td className='ps-3 text-xl font-bold'><a href={`https://www.imdb.com/title/${item.imdb}/`} target="_blank" rel="noopener noreferrer">{item.title}</a></td>
+                  <td className='text-center'><p>{item.score}</p></td>
+                  <td></td>
+                  <td><EditButton id={item.id} status={item.status} title={item.title} imdb={item.imdb} type={item.type}/></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+    );
   }
 
   return (
