@@ -8,7 +8,8 @@ const app = express();
 const Joi = require("joi");
 const {
     compareTitle,
-    compareStatus
+    compareStatus,
+    compareScore
 } = require("./scripts/indexFunctions.js");
 /* #endregion imports */
 
@@ -215,6 +216,7 @@ app.post('/searchOwnlist/:id', (req, res) => {
 app.get('/tvlist/?:id', sessionValidation, async (req, res) => {
     const id = req.params.id;
     const search = req.query.search ? req.query.search : "";
+    const sort = req.query.sort ? req.query.sort : "";
     let filtered_data = req.session.userData ? req.session.userData : [];
 
     const getOwnlists = await userCollection
@@ -255,12 +257,17 @@ app.get('/tvlist/?:id', sessionValidation, async (req, res) => {
 
     const alphabeticalData = filtered_data.sort( compareTitle );
     const dataByStatus = alphabeticalData.sort( compareStatus );
+    let currentData = dataByStatus;
+
+    if (sort !== "" && sort === "score") {
+        currentData = dataByStatus.sort( compareScore );
+    }
 
     res.render("tvlist", {
         username: req.session.username,
         authenticated: req.session.authenticated,
         status_colors: status_colors,
-        data: dataByStatus,
+        data: currentData,
         isTV: true,
         search: search
     });

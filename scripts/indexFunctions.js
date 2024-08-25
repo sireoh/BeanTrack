@@ -20,7 +20,22 @@ function compareStatus(a, b) {
     return statusOrder[a.status] - statusOrder[b.status];
 }
 
+function compareScore(a, b) {
+    const A = parseFloat(a.score);
+    const B = parseFloat(b.score);
+
+    if ( A > B ){
+        return -1;
+      }
+    if ( A < B ){
+        return 1;
+    }
+
+    return 0;
+}
+
 module.exports = { 
     compareTitle,
-    compareStatus
+    compareStatus,
+    compareScore
 };
