@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import AddButton from './addbutton';
 import EditButton from './editbutton';
+import SearchList from './searchlist';
+import StatusFilterRow from './statusfilterrow';
 
 const statusColors = {
 	"current" : "#23b230",
@@ -32,13 +34,14 @@ function compareStatus(a, b) {
   return statusOrder[a.status] - statusOrder[b.status];
 }
 
-const MakeTable = ({ type }) => {
+const MakeTable = ({ type, id, search, status }) => {
   const [outputContent, setOutputContent] = useState(null);
+  // const [currentClientData, setCurrentClientData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('https://corsproxy.io/?' + encodeURIComponent(`https://beantrack.vincef.xyz/ownlist/eo?type=${type}`));
+        const response = await fetch('https://corsproxy.io/?' + encodeURIComponent(`https://beantrack.vincef.xyz/ownlist/${id}?type=${type}`));
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -47,7 +50,23 @@ const MakeTable = ({ type }) => {
         const data = await response.json();
         const alphabeticalData = data.sort( compareTitle );
         const dataByStatus = alphabeticalData.sort( compareStatus );
-        setOutputContent(buildTable(dataByStatus));
+        let currentData = dataByStatus;
+
+        //Filters
+        if (search && search !== "") {
+          currentData = dataByStatus.filter((item) => {
+            return item.title.toLowerCase().startsWith(search.toLowerCase()) || item.title.toLowerCase() === search.toLowerCase();
+          });
+        }        
+
+        if (status && status !== "") {
+          currentData = dataByStatus.filter((item) => {
+            return item.status === status;
+          });
+        }
+
+        setOutputContent(buildTable(currentData));
+        // setCurrentClientData(currentData);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -55,6 +74,10 @@ const MakeTable = ({ type }) => {
 
     fetchData();
   }, []);
+
+  // useEffect(() => {
+  //   console.log(currentClientData);
+  // }, [currentClientData]);
 
   function buildTable(data) {
     return (
@@ -92,6 +115,8 @@ const MakeTable = ({ type }) => {
   return (
     <>
       <AddButton />
+      <StatusFilterRow type={type} id={id}/>
+      <SearchList id={id}/>
       {outputContent}
     </>
   );

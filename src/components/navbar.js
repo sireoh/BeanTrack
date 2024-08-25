@@ -1,16 +1,15 @@
 import React from 'react'
 const authenticated = 1;
-const username = "eo";
 
-const Navbar = () => {
+const Navbar = ({ id }) => {
   let content;
 
   if (authenticated) {
     content = (
         <>
-            <p className="m-auto p-3 rounded-none cursor-default">Hello <span className="font-bold">{username}</span>!</p>
-            <li><a href={"/tvlist"} className="btn btn-primary rounded-none">TV List</a></li>
-            <li><a href={"/movielist"} className="btn btn-primary rounded-none">Movie List</a></li>
+            <p className="m-auto p-3 rounded-none cursor-default">Hello <span className="font-bold">{id}</span>!</p>
+            <li><a href={"/tvlist/" + id} className="btn btn-primary rounded-none">TV List</a></li>
+            <li><a href={"/movielist/" + id} className="btn btn-primary rounded-none">Movie List</a></li>
             <li><a href="/logout" className="btn btn-error rounded-none">Logout</a></li>
         </>
     );

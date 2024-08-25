@@ -1,20 +1,50 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+let currentClientData = [];
 
 const AddModalSearchBar = () => {
   const [currentType, setCurrentType] = useState(0);
   const searchInputBox = useRef(null);
-  const [outputContent, setOutputContent] = useState(null);
+  const [outputDOM, setOutputDOM] = useState(null);
 
   const types = ["TV", "MOVIES"];
   const OMDB_KEY = "b05a38fc";
 
-  function handleOutputContent(search, type, data) {
-    console.log(search);
+  function handleOutputDOM(search, type, data) {
+    currentClientData = data;
     if (type == 0) {
-        setOutputContent(outputTV(data));
+      setOutputDOM(outputTV(data));
     } else {
-        setOutputContent(outputMovie(data));
+      setOutputDOM(outputMovie(data));
     }
+  }
+
+  function handleAdd(index) {
+    const item = currentClientData[index];
+    let obj = { type: types[currentType].toLowerCase() };
+
+    if (types[currentType] === "TV") {
+      obj = {
+        id: item.show.id,
+        status: "current",
+        image: item.show.image.medium,
+        title: item.show.name,
+        imdb: item.show.externals.imdb,
+        score: item.show.rating.average
+      };
+    }
+
+    if (types[currentType] === "MOVIES") {
+      obj = {
+        id: item.imdbID.substring(2),
+        status: "current",
+        image: item.Poster,
+        title: item.Title,
+        imdb: item.imdbID,
+        score: "wip"
+      };
+    }
+
+    console.log(obj);
   }
 
   function outputTV(data) {
@@ -35,6 +65,7 @@ const AddModalSearchBar = () => {
                 <th className='w-1/12'>Image</th>
                 <th className='text-left ps-3'>Name</th>
                 <th className='w-min'>Score</th>
+                <th className='w-1/12'></th>
               </tr>
             </thead>
             <tbody>
@@ -43,6 +74,7 @@ const AddModalSearchBar = () => {
                 <td><img src={item.show.image ? item.show.image.medium : ""} alt={item.show.id} height="128px" width="180px" /></td>
                 <td className='ps-3 text-xl font-bold'><a href={`https://www.imdb.com/title/${item.show.externals.imdb}/`} target="_blank" rel="noopener noreferrer">{item.show.name}</a></td>
                 <td className='text-center'><p>{(item.show.rating.average) ? item.show.rating.average : "-"}</p></td>
+                <td className='text-center'><button className='btn btn-primary' onClick={() => {handleAdd(index)}}>Add</button></td>
               </tr>
               ))}
             </tbody>
@@ -69,6 +101,7 @@ const AddModalSearchBar = () => {
                 <th className='w-1/12'>Image</th>
                 <th className='text-left ps-3'>Name</th>
                 <th className='w-min'>Score</th>
+                <th className='w-1/12'></th>
               </tr>
             </thead>
             <tbody>
@@ -77,6 +110,7 @@ const AddModalSearchBar = () => {
                 <td><img src={item.Poster} alt={item.imdbID.substring(2)} height="128px" width="180px" /></td>
                 <td className='ps-3 text-xl font-bold'><a href={`https://www.imdb.com/title/${item.imdbID}/`} target="_blank" rel="noopener noreferrer">{item.Title}</a></td>
                 <td className='text-center'>-</td>
+                <td className='text-center'><button className='btn btn-primary' onClick={() => {handleAdd(index)}}>Add</button></td>
               </tr>
               ))}
             </tbody>
@@ -92,14 +126,15 @@ const AddModalSearchBar = () => {
   async function handleSubmit(event) {
     event.preventDefault();
     const search = searchInputBox.current.value;
+
     if (currentType == 0) {
         await fetch(`https://api.tvmaze.com/search/shows?q=${search}`)
         .then((res) => res.json())
         .then((data) => { 
           if (data.length >= 1) {
-            handleOutputContent(search, 0, data);
+            handleOutputDOM(search, 0, data);
           } else {
-            handleOutputContent(search, 0, data={Error: "TV Show not found!"});
+            handleOutputDOM(search, 0, data={Error: "TV Show not found!"});
           }
          });
       } else if (currentType == 1) {
@@ -108,9 +143,9 @@ const AddModalSearchBar = () => {
         .then((res) => res.json())
         .then((data) => { 
           if (data.Response == "True") {
-            handleOutputContent(search, 1, data.Search)
+            handleOutputDOM(search, 1, data.Search)
           } else {
-            handleOutputContent(search, 1, data)
+            handleOutputDOM(search, 1, data)
           }
          })
         .catch((error) => {
@@ -146,7 +181,7 @@ const AddModalSearchBar = () => {
             className="input input-bordered input-lg w-full pr-12"
             ref={searchInputBox}
           />
-          <button className="absolute inset-y-0 right-0 flex items-center pr-3" type="submit">
+          <button className="absolute inset-y-0 right-0 flex items-center pr-3" type="submit" onClick={handleSubmit}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="w-5 h-5 text-gray-500"
@@ -171,7 +206,7 @@ const AddModalSearchBar = () => {
     <div>
       {typeToggle}
       {searchBar}
-      <div>{outputContent}</div>
+      <div>{outputDOM}</div>
     </div>
   );
 };

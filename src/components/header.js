@@ -1,9 +1,9 @@
 import React from 'react'
 import Navbar from './navbar'
 
-const Header = () => {
+const Header = ({ id }) => {
   return (
-    <Navbar />
+    <Navbar id={id}/>
   )
 }
 
