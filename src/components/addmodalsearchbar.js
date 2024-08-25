@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 let currentClientData = [];
+let currentAddStatus = "";
 
-const AddModalSearchBar = () => {
+const AddModalSearchBar = ({ TVOwnList }) => {
   const [currentType, setCurrentType] = useState(0);
   const searchInputBox = useRef(null);
   const [outputDOM, setOutputDOM] = useState(null);
@@ -11,11 +12,16 @@ const AddModalSearchBar = () => {
 
   function handleOutputDOM(search, type, data) {
     currentClientData = data;
-    if (type == 0) {
+    if (type === 0) {
       setOutputDOM(outputTV(data));
     } else {
       setOutputDOM(outputMovie(data));
     }
+  }
+
+  function handleSetAddedStatus(event) {
+    currentAddStatus = event.target.value;
+    console.log(currentAddStatus);
   }
 
   function handleAdd(index) {
@@ -25,7 +31,7 @@ const AddModalSearchBar = () => {
     if (types[currentType] === "TV") {
       obj = {
         id: item.show.id,
-        status: "current",
+        status: currentAddStatus,
         image: item.show.image.medium,
         title: item.show.name,
         imdb: item.show.externals.imdb,
@@ -36,7 +42,7 @@ const AddModalSearchBar = () => {
     if (types[currentType] === "MOVIES") {
       obj = {
         id: item.imdbID.substring(2),
-        status: "current",
+        status: currentAddStatus,
         image: item.Poster,
         title: item.Title,
         imdb: item.imdbID,
@@ -45,6 +51,36 @@ const AddModalSearchBar = () => {
     }
 
     console.log(obj);
+  }
+
+  function checkIfAdded(index, imdb) {
+    const isTVAdded = TVOwnList.some(item => item.imdb === imdb);
+    const statusMenu = (
+      <select className="select select-bordered w-full" onChange={handleSetAddedStatus}>
+        <option value="current">Currently Watching</option>
+        <option value="completed">Completed</option>
+        <option value="onhold">On Hold</option>
+        <option value="dropped">Dropped</option>
+        <option value="planned">Plan to Watch</option>
+      </select>
+    );
+  
+    return (
+      <>
+        <td>
+          {!isTVAdded && statusMenu}
+        </td>
+        <td className='text-center'>
+          <button
+            className='btn btn-primary'
+            onClick={() => handleAdd(index)}
+            disabled={isTVAdded}
+          >
+            {isTVAdded ? 'Added' : 'Add'}
+          </button>
+        </td>
+      </>
+    );
   }
 
   function outputTV(data) {
@@ -65,6 +101,7 @@ const AddModalSearchBar = () => {
                 <th className='w-1/12'>Image</th>
                 <th className='text-left ps-3'>Name</th>
                 <th className='w-min'>Score</th>
+                <th className='w-2/12'></th>
                 <th className='w-1/12'></th>
               </tr>
             </thead>
@@ -74,7 +111,7 @@ const AddModalSearchBar = () => {
                 <td><img src={item.show.image ? item.show.image.medium : ""} alt={item.show.id} height="128px" width="180px" /></td>
                 <td className='ps-3 text-xl font-bold'><a href={`https://www.imdb.com/title/${item.show.externals.imdb}/`} target="_blank" rel="noopener noreferrer">{item.show.name}</a></td>
                 <td className='text-center'><p>{(item.show.rating.average) ? item.show.rating.average : "-"}</p></td>
-                <td className='text-center'><button className='btn btn-primary' onClick={() => {handleAdd(index)}}>Add</button></td>
+                {checkIfAdded(index, item.show.externals.imdb)}
               </tr>
               ))}
             </tbody>
@@ -101,6 +138,7 @@ const AddModalSearchBar = () => {
                 <th className='w-1/12'>Image</th>
                 <th className='text-left ps-3'>Name</th>
                 <th className='w-min'>Score</th>
+                <th className='w-2/12'></th>
                 <th className='w-1/12'></th>
               </tr>
             </thead>
@@ -110,7 +148,7 @@ const AddModalSearchBar = () => {
                 <td><img src={item.Poster} alt={item.imdbID.substring(2)} height="128px" width="180px" /></td>
                 <td className='ps-3 text-xl font-bold'><a href={`https://www.imdb.com/title/${item.imdbID}/`} target="_blank" rel="noopener noreferrer">{item.Title}</a></td>
                 <td className='text-center'>-</td>
-                <td className='text-center'><button className='btn btn-primary' onClick={() => {handleAdd(index)}}>Add</button></td>
+                {checkIfAdded(index, item.imdbID)}
               </tr>
               ))}
             </tbody>
@@ -127,7 +165,7 @@ const AddModalSearchBar = () => {
     event.preventDefault();
     const search = searchInputBox.current.value;
 
-    if (currentType == 0) {
+    if (currentType === 0) {
         await fetch(`https://api.tvmaze.com/search/shows?q=${search}`)
         .then((res) => res.json())
         .then((data) => { 
@@ -137,12 +175,12 @@ const AddModalSearchBar = () => {
             handleOutputDOM(search, 0, data={Error: "TV Show not found!"});
           }
          });
-      } else if (currentType == 1) {
+      } else if (currentType === 1) {
         const url = `https://www.omdbapi.com/?s=${search}&apikey=${OMDB_KEY}`;
         await fetch(url)
         .then((res) => res.json())
         .then((data) => { 
-          if (data.Response == "True") {
+          if (data.Response === "True") {
             handleOutputDOM(search, 1, data.Search)
           } else {
             handleOutputDOM(search, 1, data)

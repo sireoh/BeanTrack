@@ -1,7 +1,7 @@
 import React from 'react'
 import AddModalSearchBar from './addmodalsearchbar';
 
-const AddModal = () => {
+const AddModal = ({ data }) => {
   const closeButton = (
     <form method="dialog" className="modal-backdrop">
       <button />
@@ -11,7 +11,7 @@ const AddModal = () => {
   return (
     <dialog id="Wt8FtOge" className="modal">
       <div className="modal-box w-11/12 max-w-7xl relative">
-        <AddModalSearchBar />
+        <AddModalSearchBar TVOwnList={data}/>
       </div>
       {closeButton}
     </dialog>

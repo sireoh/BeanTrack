@@ -4,6 +4,8 @@ import EditButton from './editbutton';
 import SearchList from './searchlist';
 import StatusFilterRow from './statusfilterrow';
 
+let ownList;
+
 const statusColors = {
 	"current" : "#23b230",
 	"completed" : "#26448f",
@@ -36,7 +38,6 @@ function compareStatus(a, b) {
 
 const MakeTable = ({ type, id, search, status }) => {
   const [outputContent, setOutputContent] = useState(null);
-  // const [currentClientData, setCurrentClientData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,8 +52,8 @@ const MakeTable = ({ type, id, search, status }) => {
         const alphabeticalData = data.sort( compareTitle );
         const dataByStatus = alphabeticalData.sort( compareStatus );
         let currentData = dataByStatus;
+        ownList = data;
 
-        //Filters
         if (search && search !== "") {
           currentData = dataByStatus.filter((item) => {
             return item.title.toLowerCase().startsWith(search.toLowerCase()) || item.title.toLowerCase() === search.toLowerCase();
@@ -66,7 +67,6 @@ const MakeTable = ({ type, id, search, status }) => {
         }
 
         setOutputContent(buildTable(currentData));
-        // setCurrentClientData(currentData);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -74,10 +74,6 @@ const MakeTable = ({ type, id, search, status }) => {
 
     fetchData();
   }, []);
-
-  // useEffect(() => {
-  //   console.log(currentClientData);
-  // }, [currentClientData]);
 
   function buildTable(data) {
     return (
@@ -114,7 +110,7 @@ const MakeTable = ({ type, id, search, status }) => {
 
   return (
     <>
-      <AddButton />
+      <AddButton data={ownList}/>
       <StatusFilterRow type={type} id={id}/>
       <SearchList id={id}/>
       {outputContent}
