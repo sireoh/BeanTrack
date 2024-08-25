@@ -1,4 +1,6 @@
 node_modules/
 .env
 .cache
-public
+public/~partytown
+public/page-data
+public/static
