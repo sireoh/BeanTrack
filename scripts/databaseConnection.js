@@ -1,8 +1,6 @@
 // Imports
 require('dotenv').config();
-const { ObjectId } = require("mongodb");
-const NumberInt = require("mongodb").Int32;
-const MongoClient = require("mongodb").MongoClient;
+const { ObjectId, Int32: NumberInt, MongoClient } = require("mongodb");
 const MongoStore = require('connect-mongo');
 
 // Session secrets
@@ -14,26 +12,38 @@ const mongodb_user = process.env.MONGODB_USER;
 const mongodb_password = process.env.MONGODB_PASSWORD;
 const mongodb_database = process.env.MONGODB_DATABASE;
 const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}`;
-var database = new MongoClient(atlasURI, {useNewUrlParser: true, useUnifiedTopology: true});
+
+// Create a new MongoClient
+const client = new MongoClient(atlasURI);
+
+// Connect to the database
+client.connect().then(() => {
+    console.log("Connected to MongoDB");
+}).catch(err => {
+    console.error("Failed to connect to MongoDB", err);
+});
 
 // User and session database
-const userCollection = database.db(mongodb_database).collection('users');
-const tvOwnlist = database.db(mongodb_database).collection('tvlist');
-const movieOwnlist = database.db(mongodb_database).collection('movielist');
+const database = client.db(mongodb_database);
+const userCollection = database.collection('users');
+const tvOwnlist = database.collection('tvlist');
+const movieOwnlist = database.collection('movielist');
+
 const mongoSessions = MongoStore.create({
-	mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
-	crypto: {
-		secret: mongodb_session_secret
-	},
+    mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
+    crypto: {
+        secret: mongodb_session_secret
+    },
     collectionName: 'sessions'
-})
+});
 
 // Export
-module.exports = { 
-	ObjectId,
-	NumberInt,
+module.exports = {
+    ObjectId,
+    NumberInt,
     userCollection,
-	tvOwnlist,
-	movieOwnlist,
-    mongoSessions
- };
+    tvOwnlist,
+    movieOwnlist,
+    mongoSessions,
+    client  // Exporting the client for closing the connection when needed
+};
