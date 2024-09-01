@@ -3,7 +3,7 @@ require("./utils.js");
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const app = express();
 const Joi = require("joi");
 const {
